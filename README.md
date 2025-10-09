@@ -233,6 +233,23 @@ sequenceDiagram
    * Shows created, shared, and boosted events, and followed pages.
 
    ![sample wireframe image for profile & event view](https://res.cloudinary.com/dao2elffs/image/upload/v1759987637/wireframe-eventify-2_wuecpn.png)
+---
+# GEMINI UI GENERATED IDEA
+---
+**Profile Page**
+![profile page](https://res.cloudinary.com/dao2elffs/image/upload/v1759989044/Gemini_Generated_Image_UI-5_jd4bqy.png)
+
+**Home Page (map view)**
+![home page - MAP VIEW](https://res.cloudinary.com/dao2elffs/image/upload/v1759988379/Gemini_Generated_UI-1_rmn11g.png)
+
+**Home Page (List view)**
+![home page - LIST VIEW](https://res.cloudinary.com/dao2elffs/image/upload/v1759988379/Gemini_Generated_UI-2_wdcxu9.png)
+
+**Event detail Page**
+![event detail page](https://res.cloudinary.com/dao2elffs/image/upload/v1759988378/Gemini_Generated_UI-3_gwsajt.png)
+
+**Creaete Event Page**
+![create event page](https://res.cloudinary.com/dao2elffs/image/upload/v1759988378/Gemini_Generated_Image_UI-4_smuwuu.png)
 
 
 ---
