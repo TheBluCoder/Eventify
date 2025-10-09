@@ -81,6 +81,36 @@ flowchart LR
   B --> F["Google Maps API"]
   B --> G["Supabase Edge Functions"]
 ```
+Here’s how the flow works conceptually:
+```mermaid
+flowchart TB
+    APP[MOBILE APP]
+    GATEWAY[API Gateway]
+    
+    AUTH[Supabase Auth]
+    DB[Supabase DB<br/>Postgres + PostGIS]
+    RT[Supabase Realtime]
+    STORAGE[Supabase Storage]
+    EDGE[Supabase Edge Functions]
+    PUSH[Push Service<br/>FCM/APNs]
+    
+    APP --> GATEWAY
+    
+    GATEWAY -->|gRPC: login/signup| AUTH
+    GATEWAY -->|gRPC: queries| DB
+    GATEWAY -->|gRPC: subscribes| RT
+    GATEWAY -->|gRPC: uploads images| STORAGE
+    GATEWAY -->|triggers| EDGE
+    PUSH -->|receives notifications| APP
+    
+    DB -.->|radius queries<br/>tags, events, follows| DB
+    RT -.->|new events nearby| RT
+    
+    EDGE -->|send_push_notifications| PUSH
+    EDGE -.->|moderate_reported_event| EDGE
+    EDGE -.->|expire_old_events| EDGE
+```
+
 
 ---
 
