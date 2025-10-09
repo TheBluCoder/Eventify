@@ -210,6 +210,7 @@ sequenceDiagram
    * Event cards show: title, thumbnail, distance, category tag, date/time, and quick action buttons (Follow, Add to Calendar, Report).
    * Supports sorting by distance, recency, or popularity.
 
+
 3. **Event Detail Page**
 
    * Title, description, date/time, location map.
@@ -220,6 +221,8 @@ sequenceDiagram
    * Fields for title, description, location picker, tags.
    * Expiry and reminder options.
 
+  ![sample wireframe image for home & event view](https://res.cloudinary.com/dao2elffs/image/upload/v1759987637/wireframe-eventify_ypulnc.png)
+  
 5. **Follow Page**
 
    * Tabs for Pages, Categories, and Users.
@@ -228,6 +231,9 @@ sequenceDiagram
 6. **Profile Page**
 
    * Shows created, shared, and boosted events, and followed pages.
+
+   ![sample wireframe image for profile & event view](https://res.cloudinary.com/dao2elffs/image/upload/v1759987637/wireframe-eventify-2_wuecpn.png)
+
 
 ---
 
