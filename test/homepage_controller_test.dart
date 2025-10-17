@@ -7,10 +7,9 @@ import 'package:location/location.dart';
 import 'dart:async';
 
 // Import your classes
-import 'package:echoes/controllers/homepage_controller.dart';
-import 'package:echoes/utils/marker_manager.dart';
-// import 'package:echoes/controllers/map_controller_wrapper.dart';
-import 'package:echoes/utils/location_service.dart';
+import 'package:echoes/features/home/controllers/home_controller.dart';
+import 'package:echoes/features/events/widgets/marker_manager.dart';
+import 'package:echoes/features/location/services/location_service.dart';
 
 // Generate mocks with: flutter pub run build_runner build
 @GenerateNiceMocks([MockSpec<Location>(), MockSpec<LocationService>(), MockSpec<GoogleMapController>()])

@@ -7,7 +7,7 @@ import 'dart:async' as _i5;
 import 'dart:typed_data' as _i8;
 import 'dart:ui' as _i6;
 
-import 'package:echoes/controllers/location_service.dart' as _i7;
+import 'package:echoes/features/location/services/location_service.dart' as _i7;
 import 'package:google_maps_flutter/google_maps_flutter.dart' as _i3;
 import 'package:location/location.dart' as _i4;
 import 'package:location_platform_interface/location_platform_interface.dart'

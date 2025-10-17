@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '../utils/location_service.dart';
-import '../utils/marker_manager.dart';
-import '../utils/map_controller_wrapper.dart';
+import '../../location/services/location_service.dart';
+import '../../events/widgets/marker_manager.dart';
+import '../../events/widgets/map_controller_wrapper.dart';
 
 /// Controller for HomePage logic
 class HomePageController extends ChangeNotifier {

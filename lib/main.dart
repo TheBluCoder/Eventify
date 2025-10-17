@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
-import 'pages/map_view_homepage.dart';
+import 'features/home/pages/map_view_page.dart';
+import 'providers/app_providers.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    AppProviders.createMultiProvider(
+      child: const MyApp(),
+    ),
+  );
 } 
 
 class MyApp extends StatelessWidget {
