@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'location_service.dart';
-import 'marker_manager.dart';
-import 'map_controller_wrapper.dart';
+import '../utils/location_service.dart';
+import '../utils/marker_manager.dart';
+import '../utils/map_controller_wrapper.dart';
 
 /// Controller for HomePage logic
 class HomePageController extends ChangeNotifier {
@@ -72,12 +72,12 @@ class HomePageController extends ChangeNotifier {
     _mapControllerWrapper.setController(controller);
   }
 
-  /// Handles recenter button press
-  Future<void> onRecenterPressed() async {
-    if (_userLocationCoords != null) {
-      await _mapControllerWrapper.animateCameraToPosition(_userLocationCoords!);
-    }
+ /// Handles filter button press
+  void onRecenterPressed() {
+    // Implement filter logic
+    debugPrint('Filter button pressed');
   }
+
 
   /// Handles filter button press
   void onFilterPressed() {
