@@ -2,6 +2,56 @@
 
 ---
 
+## 🚀 Quick Start
+
+### Prerequisites
+- Flutter SDK installed
+- Android Studio / VS Code with Flutter extensions
+- Google Maps API key
+
+### Setup Instructions
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd echoes
+   ```
+
+2. **Install dependencies**
+   ```bash
+   flutter pub get
+   ```
+
+3. **Configure Google Maps API Key**
+   
+   **Option A: Using local.properties (Recommended)**
+   - Open `android/local.properties`
+   - Add your Google Maps API key:
+     ```properties
+     MAPS_API_KEY="YOUR_GOOGLE_MAPS_API_KEY_HERE"
+     ```
+   
+   **Option B: Direct in AndroidManifest.xml**
+   - Open `android/app/src/main/AndroidManifest.xml`
+   - Replace `${MAPS_API_KEY}` with your actual API key:
+     ```xml
+     <meta-data 
+         android:name="com.google.android.geo.API_KEY"
+         android:value="YOUR_GOOGLE_MAPS_API_KEY_HERE"/>
+     ```
+
+4. **Run the app**
+   ```bash
+   flutter run
+   ```
+
+> **Note:** Make sure your Google Maps API key has the following APIs enabled:
+> - Maps SDK for Android
+> - Places API (if using place search)
+> - Geocoding API (if using reverse geocoding)
+
+---
+
 ## 🧭 Overview
 
 **Eventify** is a geolocation-based event discovery mobile application. It enables users to explore, create, and engage with events happening nearby or in regions they follow. Events are displayed on an interactive map with filtering, following, and reminder functionalities. The app bridges both hyperlocal (e.g., garage sales, uni hackathons) and global events (e.g., concerts, tech expos) to create a unified event discovery experience.
