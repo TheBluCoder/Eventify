@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../features/home/controllers/home_controller.dart';
+import '../controllers/location_controller.dart';
 
 /// Centralized provider configuration for the app
 class AppProviders {
   /// Returns a list of all providers used in the app
   static List<ChangeNotifierProvider> get providers => [
     ChangeNotifierProvider(
-      create: (_) => HomePageController()..initialize(),
+      create: (_) => LocationController()..initialize(),
     ),
     // Add more providers here as you create them:
     // ChangeNotifierProvider(create: (_) => EventsController()),
     // ChangeNotifierProvider(create: (_) => AuthController()),
-    // ChangeNotifierProvider(create: (_) => LocationController()),
+    // ChangeNotifierProvider(create: (_) => DiscoverController()),
   ];
 
   /// Helper method to create MultiProvider widget

@@ -1,12 +1,15 @@
+import 'controllers/location_controller.dart';
 import 'package:flutter/material.dart';
-import 'features/home/pages/map_view_page.dart';
-import 'providers/app_providers.dart';
+import 'package:provider/provider.dart';
+import 'pages/main_navigation_page.dart';
+// import 'providers/app_providers.dart';
 
 void main() {
   runApp(
-    AppProviders.createMultiProvider(
-      child: const MyApp(),
-    ),
+   ChangeNotifierProvider(
+    create: (context) => LocationController()..initialize(),
+    child: MyApp(),
+   )
   );
 } 
 
@@ -23,7 +26,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue.withValues(alpha: 0.85),),
         useMaterial3: true,
       ).copyWith(
-        textTheme: ThemeData.dark().textTheme.apply(
+        textTheme: ThemeData.light().textTheme.apply(
           fontFamily: 'Poppins',
        
         ),
@@ -33,7 +36,7 @@ class MyApp extends StatelessWidget {
           // foregroundColor: Colors.white,
         ),
       ),
-      home: const HomePage(title: 'Echoes '),
+      home: const MainNavigationPage(),
     );
   }
 }

@@ -1,0 +1,186 @@
+import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../shared/widgets/marker_manager.dart';
+import '../shared/widgets/map_controller_wrapper.dart';
+
+/// Controller for DiscoverPage logic
+/// Handles map-specific functionality and view switching
+class DiscoverController extends ChangeNotifier {
+  final MarkerManager _markerManager;
+  final MapControllerWrapper _mapControllerWrapper;
+
+  bool _isMapView = false; // Local state for view switching
+  bool _hasInitiallyPositionedCamera = false;
+  
+  // Filter and discovery properties
+  String _selectedCategory = 'All';
+  int _eventCount = 247; // Mock data - will be replaced with real data
+  int _radiusKm = 5;
+  String _locationName = 'Lagos, Nigeria'; // Mock data - will be replaced with real location
+  String _dateRange = 'Anytime';
+  String _eventType = 'All';
+  String _priceFilter = 'All';
+  bool _verifiedOnly = false;
+  String _sortBy = 'Distance';
+
+  DiscoverController({
+    MarkerManager? markerManager,
+    MapControllerWrapper? mapControllerWrapper,
+  })  : _markerManager = markerManager ?? MarkerManager(),
+        _mapControllerWrapper = mapControllerWrapper ?? MapControllerWrapper();
+
+  // Getters
+  bool get isMapView => _isMapView;
+  Set<Marker> get markers => _markerManager.markers;
+  String get selectedCategory => _selectedCategory;
+  int get eventCount => _eventCount;
+  int get radiusKm => _radiusKm;
+  String get locationName => _locationName;
+  String get dateRange => _dateRange;
+  String get eventType => _eventType;
+  String get priceFilter => _priceFilter;
+  bool get verifiedOnly => _verifiedOnly;
+  String get sortBy => _sortBy;
+  
+  bool get hasActiveFilters => 
+    _selectedCategory != 'All' ||
+    _dateRange != 'Anytime' ||
+    _eventType != 'All' ||
+    _priceFilter != 'All' ||
+    _verifiedOnly;
+
+  /// Toggles between map and list view
+  void toggleView() {
+    _isMapView = !_isMapView;
+    notifyListeners();
+  }
+
+  /// Sets map view
+  void setMapView() {
+    _isMapView = true;
+    notifyListeners();
+  }
+
+  /// Sets list view
+  void setListView() {
+    _isMapView = false;
+    notifyListeners();
+  }
+
+  /// Sets the map controller
+  void onMapCreated(GoogleMapController controller) {
+    _mapControllerWrapper.setController(controller);
+  }
+
+  /// Handles recenter button press
+  void onRecenterPressed(LatLng? userLocation) {
+    if (userLocation != null) {
+      _mapControllerWrapper.animateCameraToPosition(userLocation);
+    }
+    debugPrint('Recenter button pressed');
+  }
+
+  /// Updates user location marker
+  void updateUserLocationMarker(LatLng location) {
+    _markerManager.updateUserLocationMarker(location);
+    
+    // Only animate camera to user location on initial positioning
+    if (!_hasInitiallyPositionedCamera) {
+      _mapControllerWrapper.animateCameraToPosition(location);
+      _hasInitiallyPositionedCamera = true;
+    }
+    
+    notifyListeners();
+  }
+
+  /// Handles filter button press
+  void onFilterPressed() {
+    debugPrint('Filter button pressed');
+    // TODO: Implement filter logic
+  }
+
+  // Filter and discovery methods
+  void selectCategory(String category) {
+    _selectedCategory = category;
+    _updateEventCount(); // Update event count based on filters
+    notifyListeners();
+  }
+
+  void setRadius(int radiusKm) {
+    _radiusKm = radiusKm;
+    _updateEventCount();
+    notifyListeners();
+  }
+
+  void setDateRange(String range) {
+    _dateRange = range;
+    _updateEventCount();
+    notifyListeners();
+  }
+
+  void setEventType(String type) {
+    _eventType = type;
+    _updateEventCount();
+    notifyListeners();
+  }
+
+  void setPriceFilter(String price) {
+    _priceFilter = price;
+    _updateEventCount();
+    notifyListeners();
+  }
+
+  void setVerifiedOnly(bool value) {
+    _verifiedOnly = value;
+    _updateEventCount();
+    notifyListeners();
+  }
+
+  void setSortBy(String sortOption) {
+    _sortBy = sortOption;
+    notifyListeners();
+  }
+
+  void clearFilters() {
+    _selectedCategory = 'All';
+    _dateRange = 'Anytime';
+    _eventType = 'All';
+    _priceFilter = 'All';
+    _verifiedOnly = false;
+    _radiusKm = 5;
+    _updateEventCount();
+    notifyListeners();
+  }
+
+  void updateLocationName(String name) {
+    _locationName = name;
+    notifyListeners();
+  }
+
+  // Mock method to update event count based on filters
+  // This will be replaced with actual API calls later
+  void _updateEventCount() {
+    // Simulate different event counts based on filters
+    int baseCount = 247;
+    
+    if (_selectedCategory != 'All') baseCount = (baseCount * 0.3).toInt();
+    if (_dateRange == 'Today') baseCount = (baseCount * 0.1).toInt();
+    if (_dateRange == 'This Week') baseCount = (baseCount * 0.4).toInt();
+    if (_dateRange == 'This Month') baseCount = (baseCount * 0.7).toInt();
+    if (_eventType != 'All') baseCount = (baseCount * 0.6).toInt();
+    if (_priceFilter == 'Free') baseCount = (baseCount * 0.5).toInt();
+    if (_priceFilter == 'Paid') baseCount = (baseCount * 0.5).toInt();
+    if (_verifiedOnly) baseCount = (baseCount * 0.3).toInt();
+    
+    // Adjust by radius
+    baseCount = (baseCount * (_radiusKm / 10)).toInt().clamp(0, 999);
+    
+    _eventCount = baseCount;
+  }
+
+  @override
+  void dispose() {
+    _mapControllerWrapper.dispose();
+    super.dispose();
+  }
+}
