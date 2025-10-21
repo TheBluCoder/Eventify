@@ -2,6 +2,158 @@
 
 ---
 
+## 🚀 Quick Start
+
+### Prerequisites
+- Flutter SDK installed
+- Android Studio / VS Code with Flutter extensions
+- Google Maps API key
+
+### Setup Instructions
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd echoes
+   ```
+
+2. **Install dependencies**
+   ```bash
+   flutter pub get
+   ```
+
+3. **Configure Google Maps API Key**
+   
+   **Option A: Using local.properties (Recommended)**
+   - Open `android/local.properties`
+   - Add your Google Maps API key:
+     ```properties
+     MAPS_API_KEY="YOUR_GOOGLE_MAPS_API_KEY_HERE"
+     ```
+   
+   **Option B: Direct in AndroidManifest.xml**
+   - Open `android/app/src/main/AndroidManifest.xml`
+   - Replace `${MAPS_API_KEY}` with your actual API key:
+     ```xml
+     <meta-data 
+         android:name="com.google.android.geo.API_KEY"
+         android:value="YOUR_GOOGLE_MAPS_API_KEY_HERE"/>
+     ```
+
+4. **Run the app**
+   ```bash
+   flutter run
+   ```
+
+> **Note:** Make sure your Google Maps API key has the following APIs enabled:
+> - Maps SDK for Android
+> - Places API (if using place search)
+> - Geocoding API (if using reverse geocoding)
+
+---
+
+## 📁 Project Structure
+
+### Directory Organization
+
+The project follows a **feature-based architecture** with Provider for state management, organized for scalability and maintainability:
+
+```
+lib/
+├── main.dart
+├── app/
+│   ├── app.dart                    # App configuration & theme
+│   ├── theme/
+│   │   ├── app_theme.dart          # Theme configuration
+│   │   └── app_colors.dart         # Color definitions
+│   └── routes/
+│       └── app_routes.dart         # Route definitions
+├── core/
+│   ├── constants/
+│   │   └── app_constants.dart      # App-wide constants
+│   ├── services/
+│   │   ├── api_service.dart        # API communication
+│   │   ├── storage_service.dart    # Local storage
+│   │   └── notification_service.dart
+│   └── utils/
+│       ├── validators.dart         # Input validation
+│       └── extensions.dart         # Dart extensions
+├── features/
+│   ├── home/
+│   │   ├── controllers/
+│   │   │   └── home_controller.dart
+│   │   ├── pages/
+│   │   │   ├── home_page.dart
+│   │   │   ├── map_view_page.dart
+│   │   │   └── list_view_page.dart
+│   │   └── widgets/
+│   │       ├── search_bar_widget.dart
+│   │       ├── view_toggle_widget.dart
+│   │       └── bottom_controls_widget.dart
+│   ├── events/
+│   │   ├── controllers/
+│   │   │   ├── events_controller.dart
+│   │   │   └── event_detail_controller.dart
+│   │   ├── pages/
+│   │   │   ├── event_detail_page.dart
+│   │   │   └── create_event_page.dart
+│   │   ├── widgets/
+│   │   │   ├── event_card_widget.dart
+│   │   │   └── event_filter_widget.dart
+│   │   └── models/
+│   │       └── event_model.dart
+│   ├── location/
+│   │   ├── controllers/
+│   │   │   └── location_controller.dart
+│   │   └── services/
+│   │       └── location_service.dart
+│   ├── auth/
+│   │   ├── controllers/
+│   │   │   └── auth_controller.dart
+│   │   ├── pages/
+│   │   │   ├── login_page.dart
+│   │   │   └── signup_page.dart
+│   │   └── widgets/
+│   │       └── auth_form_widget.dart
+│   └── profile/
+│       ├── controllers/
+│       │   └── profile_controller.dart
+│       ├── pages/
+│       │   └── profile_page.dart
+│       └── widgets/
+│           └── profile_widget.dart
+├── shared/
+│   ├── widgets/
+│   │   ├── loading_widget.dart
+│   │   ├── error_widget.dart
+│   │   └── custom_button.dart
+│   └── models/
+│       └── api_response.dart
+└── providers/
+    └── app_providers.dart          # MultiProvider setup
+```
+
+### Why This Structure?
+
+1. **Feature-Based Organization**: Each feature (home, events, auth, etc.) is self-contained, making it easy to find and modify related code.
+
+2. **Provider-Friendly**: Uses controllers instead of complex use cases, making state management straightforward with Provider.
+
+3. **Scalable**: Easy to add new features without affecting existing code. Each feature can be developed independently.
+
+4. **Clear Separation**: 
+   - `controllers/` - State management and business logic
+   - `pages/` - Full-screen UI components
+   - `widgets/` - Reusable UI components
+   - `services/` - External service integrations
+   - `models/` - Data structures
+
+5. **Team Collaboration**: Different developers can work on different features without conflicts.
+
+6. **Testing**: Each layer can be tested independently with clear boundaries.
+
+---
+
 ## 🧭 Overview
 
 **Eventify** is a geolocation-based event discovery mobile application. It enables users to explore, create, and engage with events happening nearby or in regions they follow. Events are displayed on an interactive map with filtering, following, and reminder functionalities. The app bridges both hyperlocal (e.g., garage sales, uni hackathons) and global events (e.g., concerts, tech expos) to create a unified event discovery experience.
