@@ -56,101 +56,60 @@
 
 ### Directory Organization
 
-The project follows a **feature-based architecture** with Provider for state management, organized for scalability and maintainability:
+The project follows an **organized architecture** with Provider for state management, structured for scalability and maintainability:
 
 ```
 lib/
-├── main.dart
+├── main.dart                       # App entry point
 ├── app/
-│   ├── app.dart                    # App configuration & theme
-│   ├── theme/
-│   │   ├── app_theme.dart          # Theme configuration
-│   │   └── app_colors.dart         # Color definitions
-│   └── routes/
-│       └── app_routes.dart         # Route definitions
+│   ├── app_constants.dart          # App-wide constants
+│   ├── app_routes.dart             # Route definitions
+│   └── app_theme.dart              # Theme configuration
+├── controllers/
+│   ├── discover_controller.dart    # Discover page state management
+│   └── location_controller.dart    # Location services & state
 ├── core/
-│   ├── constants/
-│   │   └── app_constants.dart      # App-wide constants
+│   ├── constants/                  # Core constants
 │   ├── services/
-│   │   ├── api_service.dart        # API communication
-│   │   ├── storage_service.dart    # Local storage
-│   │   └── notification_service.dart
-│   └── utils/
-│       ├── validators.dart         # Input validation
-│       └── extensions.dart         # Dart extensions
-├── features/
-│   ├── home/
-│   │   ├── controllers/
-│   │   │   └── home_controller.dart
-│   │   ├── pages/
-│   │   │   ├── home_page.dart
-│   │   │   ├── map_view_page.dart
-│   │   │   └── list_view_page.dart
-│   │   └── widgets/
-│   │       ├── search_bar_widget.dart
-│   │       ├── view_toggle_widget.dart
-│   │       └── bottom_controls_widget.dart
-│   ├── events/
-│   │   ├── controllers/
-│   │   │   ├── events_controller.dart
-│   │   │   └── event_detail_controller.dart
-│   │   ├── pages/
-│   │   │   ├── event_detail_page.dart
-│   │   │   └── create_event_page.dart
-│   │   ├── widgets/
-│   │   │   ├── event_card_widget.dart
-│   │   │   └── event_filter_widget.dart
-│   │   └── models/
-│   │       └── event_model.dart
-│   ├── location/
-│   │   ├── controllers/
-│   │   │   └── location_controller.dart
-│   │   └── services/
-│   │       └── location_service.dart
-│   ├── auth/
-│   │   ├── controllers/
-│   │   │   └── auth_controller.dart
-│   │   ├── pages/
-│   │   │   ├── login_page.dart
-│   │   │   └── signup_page.dart
-│   │   └── widgets/
-│   │       └── auth_form_widget.dart
-│   └── profile/
-│       ├── controllers/
-│       │   └── profile_controller.dart
-│       ├── pages/
-│       │   └── profile_page.dart
-│       └── widgets/
-│           └── profile_widget.dart
+│   │   └── location_service.dart   # Location service implementation
+│   └── utils/                      # Utility functions & extensions
+├── pages/
+│   ├── discover_page.dart          # Main discover page
+│   ├── discover_feed_view.dart     # List view for events
+│   ├── discover_map_view_page.dart # Map view for events
+│   ├── home_page.dart              # Home page container
+│   ├── home_view.dart              # Home page content with event cards
+│   └── main_navigation_page.dart   # Main navigation wrapper
+├── routes/
+│   └── app_routes.dart             # Route definitions
 ├── shared/
-│   ├── widgets/
-│   │   ├── loading_widget.dart
-│   │   ├── error_widget.dart
-│   │   └── custom_button.dart
-│   └── models/
-│       └── api_response.dart
+│   ├── models/                     # Shared data models
+│   └── widgets/
+│       ├── map_controller_wrapper.dart # Map controller wrapper
+│       └── marker_manager.dart     # Marker management utilities
 └── providers/
     └── app_providers.dart          # MultiProvider setup
 ```
 
 ### Why This Structure?
 
-1. **Feature-Based Organization**: Each feature (home, events, auth, etc.) is self-contained, making it easy to find and modify related code.
+1. **Organized Architecture**: Clean separation of concerns with dedicated directories for different types of components, making the codebase easy to navigate and maintain.
 
-2. **Provider-Friendly**: Uses controllers instead of complex use cases, making state management straightforward with Provider.
+2. **Provider-Friendly**: Uses controllers for state management, making it straightforward to implement with Provider pattern.
 
-3. **Scalable**: Easy to add new features without affecting existing code. Each feature can be developed independently.
+3. **Scalable**: Easy to add new pages, controllers, or services without affecting existing code. Each component has a clear purpose and location.
 
 4. **Clear Separation**: 
    - `controllers/` - State management and business logic
-   - `pages/` - Full-screen UI components
-   - `widgets/` - Reusable UI components
-   - `services/` - External service integrations
-   - `models/` - Data structures
+   - `pages/` - Full-screen UI components and views
+   - `app/` - App configuration, constants, and theme
+   - `core/` - Core services and utilities
+   - `shared/` - Reusable widgets and models
+   - `routes/` - Navigation and routing logic
 
-5. **Team Collaboration**: Different developers can work on different features without conflicts.
+5. **Team Collaboration**: Different developers can work on different components without conflicts, with clear file organization.
 
-6. **Testing**: Each layer can be tested independently with clear boundaries.
+6. **Maintainable**: Each directory has a specific purpose, making it easy to locate and modify code as the project grows.
 
 ---
 
