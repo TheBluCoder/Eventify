@@ -826,15 +826,49 @@ class _HomeState extends State<Home> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Event title (reduced size)
-                          Text(
-                            event.title,
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black87,
-                                  fontSize: 14,
-                                  height: 1.3,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  event.title,
+                                  style: Theme.of(context).textTheme.bodyMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black87,
+                                        fontSize: 14,
+                                        height: 1.3,
+                                      ),
                                 ),
+                              ),
+
+                               // Registration button (if registration URL exists)
+                      if (event.registrationUrl != null &&
+                          event.registrationUrl!.isNotEmpty)
+                        OutlinedButton.icon(
+                          onPressed: () =>
+                              _launchRegistrationUrl(event.registrationUrl!),
+                          icon: const Icon(Icons.event_available, size: 14),
+                          label: Text(
+                            'Register',
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              fontSize: 11,
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            fixedSize: const Size(130, 28),
+                            foregroundColor: Colors.blue[700],
+                            side: BorderSide(color: Colors.blue[700]!),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            minimumSize: Size.zero,
+                          ),
+                          iconAlignment: IconAlignment.start,
+                        ),
+                            ],
                           ),
                           const SizedBox(height: 8),
                           // Time with icon
@@ -937,31 +971,6 @@ class _HomeState extends State<Home> {
                         ),
                       ],
 
-                      // Registration button (if registration URL exists)
-                      if (event.registrationUrl != null &&
-                          event.registrationUrl!.isNotEmpty) ...[
-                        const SizedBox(height: 12),
-                        SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton.icon(
-                            onPressed: () =>
-                                _launchRegistrationUrl(event.registrationUrl!),
-                            icon: const Icon(Icons.event_available, size: 16),
-                            label: const Text('Register / Get Tickets'),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.blue[700],
-                              side: BorderSide(color: Colors.blue[700]!),
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 10,
-                                horizontal: 16,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
                     ],
                   ),
                 ),

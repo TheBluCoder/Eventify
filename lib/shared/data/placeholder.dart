@@ -30,7 +30,7 @@ class PlaceholderData {
     ),
     EventModel(
       id: '2',
-      title: 'Music Concert Night',
+      title: 'Music Concert Night and day and more party and stuff',
       description: 'Amazing live music performance by local bands. Free entry for all attendees!',
       organizerUsername: 'Music Collective',
       organizerAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
@@ -111,7 +111,7 @@ class PlaceholderData {
     ),
     EventModel(
       id: '2',
-      title: 'Music Concert Night',
+      title: 'Music Concert Night and day and more party and stuff',
       description: 'Amazing live music performance by local bands',
       organizerUsername: 'Tech Community',
       organizerAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
