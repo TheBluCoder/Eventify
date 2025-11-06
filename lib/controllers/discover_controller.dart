@@ -3,9 +3,9 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../shared/widgets/marker_manager.dart';
 import '../shared/widgets/map_controller_wrapper.dart';
 
-/// Controller for DiscoverPage logic
+/// State class for DiscoverPage logic
 /// Handles map-specific functionality and view switching
-class DiscoverController extends ChangeNotifier {
+class DiscoverState {
   final MarkerManager _markerManager;
   final MapControllerWrapper _mapControllerWrapper;
 
@@ -23,7 +23,7 @@ class DiscoverController extends ChangeNotifier {
   bool _verifiedOnly = false;
   String _sortBy = 'Distance';
 
-  DiscoverController({
+  DiscoverState({
     MarkerManager? markerManager,
     MapControllerWrapper? mapControllerWrapper,
   })  : _markerManager = markerManager ?? MarkerManager(),
@@ -52,19 +52,16 @@ class DiscoverController extends ChangeNotifier {
   /// Toggles between map and list view
   void toggleView() {
     _isMapView = !_isMapView;
-    notifyListeners();
   }
 
   /// Sets map view
   void setMapView() {
     _isMapView = true;
-    notifyListeners();
   }
 
   /// Sets list view
   void setListView() {
     _isMapView = false;
-    notifyListeners();
   }
 
   /// Sets the map controller
@@ -89,8 +86,6 @@ class DiscoverController extends ChangeNotifier {
       _mapControllerWrapper.animateCameraToPosition(location);
       _hasInitiallyPositionedCamera = true;
     }
-    
-    notifyListeners();
   }
 
   /// Handles filter button press
@@ -102,43 +97,36 @@ class DiscoverController extends ChangeNotifier {
   // Filter and discovery methods
   void selectCategory(String category) {
     _selectedCategory = category;
-    _updateEventCount(); // Update event count based on filters
-    notifyListeners();
+    _updateEventCount();
   }
 
   void setRadius(int radiusKm) {
     _radiusKm = radiusKm;
     _updateEventCount();
-    notifyListeners();
   }
 
   void setDateRange(String range) {
     _dateRange = range;
     _updateEventCount();
-    notifyListeners();
   }
 
   void setEventType(String type) {
     _eventType = type;
     _updateEventCount();
-    notifyListeners();
   }
 
   void setPriceFilter(String price) {
     _priceFilter = price;
     _updateEventCount();
-    notifyListeners();
   }
 
   void setVerifiedOnly(bool value) {
     _verifiedOnly = value;
     _updateEventCount();
-    notifyListeners();
   }
 
   void setSortBy(String sortOption) {
     _sortBy = sortOption;
-    notifyListeners();
   }
 
   void clearFilters() {
@@ -149,12 +137,10 @@ class DiscoverController extends ChangeNotifier {
     _verifiedOnly = false;
     _radiusKm = 5;
     _updateEventCount();
-    notifyListeners();
   }
 
   void updateLocationName(String name) {
     _locationName = name;
-    notifyListeners();
   }
 
   // Mock method to update event count based on filters
@@ -178,9 +164,8 @@ class DiscoverController extends ChangeNotifier {
     _eventCount = baseCount;
   }
 
-  @override
+  /// Disposes of resources
   void dispose() {
     _mapControllerWrapper.dispose();
-    super.dispose();
   }
 }

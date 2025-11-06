@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Echoes ',
       theme: ThemeData.from(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue.withValues(alpha: 0.85),),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.white.withValues(alpha: 0.85),),
         useMaterial3: true,
       ).copyWith(
         textTheme: ThemeData.light().textTheme.apply(

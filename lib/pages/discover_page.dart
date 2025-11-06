@@ -6,31 +6,39 @@ import '../controllers/discover_controller.dart';
 import 'discover_map_view_page.dart';
 import 'discover_feed_view.dart';
 
-class DiscoverPage extends StatelessWidget {
+class DiscoverPage extends StatefulWidget {
   const DiscoverPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => DiscoverController(),
-      child: const _DiscoverPageContent(),
-    );
-  }
+  State<DiscoverPage> createState() => _DiscoverPageState();
 }
 
-class _DiscoverPageContent extends StatefulWidget {
-  const _DiscoverPageContent();
+class _DiscoverPageState extends State<DiscoverPage> {
+  final TextEditingController _searchController = TextEditingController();
+  late DiscoverState _discoverState;
+  late List<Widget> _views;
 
   @override
-  State<_DiscoverPageContent> createState() => _DiscoverPageContentState();
-}
-
-class _DiscoverPageContentState extends State<_DiscoverPageContent> {
-  final TextEditingController _searchController = TextEditingController();
+  void initState() {
+    super.initState();
+    _discoverState = DiscoverState();
+    _views = [
+      DiscoverFeedView(
+        discoverState: _discoverState,
+        onStateChanged: (updatedState) {
+          setState(() {
+            // State is already updated in place, just trigger rebuild
+          });
+        },
+      ),
+      MapViewPage(discoverState: _discoverState),
+    ];
+  }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _discoverState.dispose();
     super.dispose();
   }
 
@@ -46,23 +54,27 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
 
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Discover",
-            style: Theme.of(context).textTheme.titleLarge!.copyWith(
-              fontWeight: FontWeight.w600,
-              fontFamily: "Roboto",
+      actionsPadding: EdgeInsets.only(bottom: 10),
+      title: Padding(
+        padding: const EdgeInsets.only(bottom: 10.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Discover",
+              style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                fontWeight: FontWeight.w600,
+                fontFamily: "Roboto",
+              ),
             ),
-          ),
-          Text(
-            "Explore events around you",
-            style: Theme.of(context).textTheme.bodySmall!.copyWith(
-              color: const Color.fromARGB(255, 97, 97, 97),
+            Text(
+              "Explore events around you",
+              style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                color: const Color.fromARGB(255, 97, 97, 97),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       backgroundColor: Colors.transparent,
       surfaceTintColor: null,
@@ -128,50 +140,48 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
   }
 
   Widget _buildViewToggle(BuildContext context) {
-    return Consumer<DiscoverController>(
-      builder: (context, discoverController, child) {
-        return ElevatedButton(
-          onPressed: () {
-            discoverController.toggleView();
-          },
-          style: ElevatedButton.styleFrom(
-            minimumSize: const Size(40, 40),
-            backgroundColor: const Color.fromARGB(255, 41, 42, 43),
-            foregroundColor: Colors.white,
-            elevation: 0,
-            padding: const EdgeInsets.all(8),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          child: Icon(
-            discoverController.isMapView ? Icons.list_outlined : Icons.map_outlined,
-            size: 18,
-          ),
-        );
+    return ElevatedButton(
+      onPressed: () {
+        setState(() {
+          _discoverState.toggleView();
+        });
       },
+      style: ElevatedButton.styleFrom(
+        minimumSize: const Size(40, 40),
+        backgroundColor: const Color.fromARGB(255, 41, 42, 43),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        padding: const EdgeInsets.all(8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      child: Icon(
+        _discoverState.isMapView ? Icons.list_outlined : Icons.map_outlined,
+        size: 18,
+      ),
     );
   }
 
   Widget _buildBody(BuildContext context) {
-    return Consumer2<DiscoverController, LocationController>(
-      builder: (context, discoverController, locationController, child) {
-        // Update user location marker when location changes
-        if (locationController.hasLocation && discoverController.isMapView && locationController.userLocationCoords != null) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            discoverController.updateUserLocationMarker(locationController.userLocationCoords!);
-          });
-        }
+    final locationController = context.read<LocationController>();
+    
+    // Update user location marker when location changes
+    if (locationController.hasLocation && 
+        _discoverState.isMapView && 
+        locationController.userLocationCoords != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {
+          _discoverState.updateUserLocationMarker(locationController.userLocationCoords!);
+        });
+      });
+    }
 
-        if (discoverController.isMapView) {
-          return const MapViewPage();
-        }
-
-        return const DiscoverFeedView();
-      },
+    return IndexedStack(
+      index: _discoverState.isMapView ? 1 : 0,
+      children: _views,
     );
   }
-
 
 
   void _showAdvancedSearchModal(BuildContext context) {

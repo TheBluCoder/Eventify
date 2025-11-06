@@ -1,0 +1,416 @@
+warning: in the working copy of 'lib/app/app_constants.dart', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/main.dart', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/pages/discover_feed_view.dart', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/pages/discover_map_view_page.dart', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/pages/discover_page.dart', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/pages/home_page.dart', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/pages/home_view.dart', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/pages/main_navigation_page.dart', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'linux/flutter/generated_plugin_registrant.cc', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'linux/flutter/generated_plugins.cmake', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'macos/Flutter/GeneratedPluginRegistrant.swift', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'pubspec.lock', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'windows/flutter/generated_plugin_registrant.cc', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'windows/flutter/generated_plugins.cmake', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/lib/controllers/discover_controller.dart b/lib/controllers/discover_controller.dart[m
+[1mindex fdd305f..5359fb8 100644[m
+[1m--- a/lib/controllers/discover_controller.dart[m
+[1m+++ b/lib/controllers/discover_controller.dart[m
+[36m@@ -3,9 +3,9 @@[m [mimport 'package:google_maps_flutter/google_maps_flutter.dart';[m
+ import '../shared/widgets/marker_manager.dart';[m
+ import '../shared/widgets/map_controller_wrapper.dart';[m
+ [m
+[31m-/// Controller for DiscoverPage logic[m
+[32m+[m[32m/// State class for DiscoverPage logic[m
+ /// Handles map-specific functionality and view switching[m
+[31m-class DiscoverController extends ChangeNotifier {[m
+[32m+[m[32mclass DiscoverState {[m
+   final MarkerManager _markerManager;[m
+   final MapControllerWrapper _mapControllerWrapper;[m
+ [m
+[36m@@ -23,7 +23,7 @@[m [mclass DiscoverController extends ChangeNotifier {[m
+   bool _verifiedOnly = false;[m
+   String _sortBy = 'Distance';[m
+ [m
+[31m-  DiscoverController({[m
+[32m+[m[32m  DiscoverState({[m
+     MarkerManager? markerManager,[m
+     MapControllerWrapper? mapControllerWrapper,[m
+   })  : _markerManager = markerManager ?? MarkerManager(),[m
+[36m@@ -52,19 +52,16 @@[m [mclass DiscoverController extends ChangeNotifier {[m
+   /// Toggles between map and list view[m
+   void toggleView() {[m
+     _isMapView = !_isMapView;[m
+[31m-    notifyListeners();[m
+   }[m
+ [m
+   /// Sets map view[m
+   void setMapView() {[m
+     _isMapView = true;[m
+[31m-    notifyListeners();[m
+   }[m
+ [m
+   /// Sets list view[m
+   void setListView() {[m
+     _isMapView = false;[m
+[31m-    notifyListeners();[m
+   }[m
+ [m
+   /// Sets the map controller[m
+[36m@@ -89,8 +86,6 @@[m [mclass DiscoverController extends ChangeNotifier {[m
+       _mapControllerWrapper.animateCameraToPosition(location);[m
+       _hasInitiallyPositionedCamera = true;[m
+     }[m
+[31m-    [m
+[31m-    notifyListeners();[m
+   }[m
+ [m
+   /// Handles filter button press[m
+[36m@@ -102,43 +97,36 @@[m [mclass DiscoverController extends ChangeNotifier {[m
+   // Filter and discovery methods[m
+   void selectCategory(String category) {[m
+     _selectedCategory = category;[m
+[31m-    _updateEventCount(); // Update event count based on filters[m
+[31m-    notifyListeners();[m
+[32m+[m[32m    _updateEventCount();[m
+   }[m
+ [m
+   void setRadius(int radiusKm) {[m
+     _radiusKm = radiusKm;[m
+     _updateEventCount();[m
+[31m-    notifyListeners();[m
+   }[m
+ [m
+   void setDateRange(String range) {[m
+     _dateRange = range;[m
+     _updateEventCount();[m
+[31m-    notifyListeners();[m
+   }[m
+ [m
+   void setEventType(String type) {[m
+     _eventType = type;[m
+     _updateEventCount();[m
+[31m-    notifyListeners();[m
+   }[m
+ [m
+   void setPriceFilter(String price) {[m
+     _priceFilter = price;[m
+     _updateEventCount();[m
+[31m-    notifyListeners();[m
+   }[m
+ [m
+   void setVerifiedOnly(bool value) {[m
+     _verifiedOnly = value;[m
+     _updateEventCount();[m
+[31m-    notifyListeners();[m
+   }[m
+ [m
+   void setSortBy(String sortOption) {[m
+     _sortBy = sortOption;[m
+[31m-    notifyListeners();[m
+   }[m
+ [m
+   void clearFilters() {[m
+[36m@@ -149,12 +137,10 @@[m [mclass DiscoverController extends ChangeNotifier {[m
+     _verifiedOnly = false;[m
+     _radiusKm = 5;[m
+     _updateEventCount();[m
+[31m-    notifyListeners();[m
+   }[m
+ [m
+   void updateLocationName(String name) {[m
+     _locationName = name;[m
+[31m-    notifyListeners();[m
+   }[m
+ [m
+   // Mock method to update event count based on filters[m
+[36m@@ -178,9 +164,8 @@[m [mclass DiscoverController extends ChangeNotifier {[m
+     _eventCount = baseCount;[m
+   }[m
+ [m
+[31m-  @override[m
+[32m+[m[32m  /// Disposes of resources[m
+   void dispose() {[m
+     _mapControllerWrapper.dispose();[m
+[31m-    super.dispose();[m
+   }[m
+[31m-}[m
+[32m+[m[32m}[m
+\ No newline at end of file[m
+[1mdiff --git a/lib/main.dart b/lib/main.dart[m
+[1mindex a20e353..1e7f586 100644[m
+[1m--- a/lib/main.dart[m
+[1m+++ b/lib/main.dart[m
+[36m@@ -23,7 +23,7 @@[m [mclass MyApp extends StatelessWidget {[m
+       debugShowCheckedModeBanner: false,[m
+       title: 'Echoes ',[m
+       theme: ThemeData.from([m
+[31m-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue.withValues(alpha: 0.85),),[m
+[32m+[m[32m        colorScheme: ColorScheme.fromSeed(seedColor: Colors.white.withValues(alpha: 0.85),),[m
+         useMaterial3: true,[m
+       ).copyWith([m
+         textTheme: ThemeData.light().textTheme.apply([m
+[1mdiff --git a/lib/pages/discover_feed_view.dart b/lib/pages/discover_feed_view.dart[m
+[1mindex d3e7aed..63592d0 100644[m
+[1m--- a/lib/pages/discover_feed_view.dart[m
+[1m+++ b/lib/pages/discover_feed_view.dart[m
+[36m@@ -1,9 +1,20 @@[m
+ import 'package:flutter/material.dart';[m
+[32m+[m[32mimport 'package:google_maps_flutter/google_maps_flutter.dart';[m
+ import 'package:provider/provider.dart';[m
+ import '../controllers/discover_controller.dart';[m
+[32m+[m[32mimport '../controllers/location_controller.dart';[m
+[32m+[m[32mimport '../shared/models/event_model.dart';[m
+[32m+[m[32mimport '../shared/data/placeholder.dart';[m
+ [m
+ class DiscoverFeedView extends StatefulWidget {[m
+[31m-  const DiscoverFeedView({super.key});[m
+[32m+[m[32m  final DiscoverState discoverState;[m
+[32m+[m[32m  final Function(DiscoverState) onStateChanged;[m
+[32m+[m[41m  [m
+[32m+[m[32m  const DiscoverFeedView({[m
+[32m+[m[32m    super.key,[m[41m [m
+[32m+[m[32m    required this.discoverState,[m
+[32m+[m[32m    required this.onStateChanged,[m
+[32m+[m[32m  });[m
+ [m
+   @override[m
+   State<DiscoverFeedView> createState() => _DiscoverFeedViewState();[m
+[36m@@ -11,1115 +22,433 @@[m [mclass DiscoverFeedView extends StatefulWidget {[m
+ [m
+ class _DiscoverFeedViewState extends State<DiscoverFeedView> {[m
+   final ScrollController _scrollController = ScrollController();[m
+[31m-  String _selectedDiscoveryTab = 'trending';[m
+[32m+[m[32m  final DraggableScrollableController _sheetController = DraggableScrollableController();[m
+[32m+[m[32m  String _selectedCategory = 'All Events';[m
+[32m+[m
+[32m+[m[32m  // Mock data for events[m
+[32m+[m[32m  final List<EventModel> _events = PlaceholderData.discoverEvents;[m
+[32m+[m
+[32m+[m[32m  final List<String> _categories = PlaceholderData.discoverCategories;[m
+ [m
+   @override[m
+   void dispose() {[m
+     _scrollController.dispose();[m
+[32m+[m[32m    _sheetController.dispose();[m
+     super.dispose();[m
+   }[m
+ [m
+   @override[m
+   Widget build(BuildContext context) {[m
+[31m-    return Padding([m
+[31m-      padding: const EdgeInsets.only(top: kToolbarHeight+20),[m
+[31m-      child: RefreshIndicator([m
+[31m-        onRefresh: () async {[m
+[31m-          // TODO: Implement refresh logic[m
+[31m-          await Future.delayed(const Duration(seconds: 1));[m
+[31m-        },[m
+[31m-        child: SingleChildScrollView([m
+[31m-          controller: _scrollController,[m
+[31m-          child: Column([m
+[31m-            children: [[m
+[31m-              // Discovery tabs[m
+[31m-              _buildDiscoveryTabs(context),[m
+[31m-              // Content based on selected tab[m
+[31m-              Consumer<DiscoverController>([m
+[31m-                builder: (context, discoverController, child) {[m
+[31m-                  return _buildDiscoveryContent(context, discoverController);[m
+[31m-                },[m
+[31m-              ),[m
+[31m-            ],[m
+[31m-          ),[m
+[31m-        ),[m
+[31m-      ),[m
+[31m-    );[m
+[31m-  }[m
+[31m-[m
+[31m-  Widget _buildDiscoveryTabs(BuildContext context) {[m
+[31m-    final tabs = [[m
+[31m-      {'id': 'trending', 'label': 'Trending', 'icon': Icons.trending_up},[m
+[31m-      {'id': 'nearby', 'label': 'Nearby', 'icon': Icons.location_on},[m
+[31m-      {'id': 'categories', 'label': 'Categories', 'icon': Icons.category},[m
+[31m-      {'id': 'time', 'label': 'Time', 'icon': Icons.schedule},[m
+[31m-    ];[m
+[31m-[m
+[31m-    return Container([m
+[31m-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),[m
+[31m-      child: SingleChildScrollView([m
+[31m-        scrollDirection: Axis.horizontal,[m
+[31m-        child: Row([m
+[31m-          children: tabs.map((tab) {[m
+[31m-            final isSelected = _selectedDiscoveryTab == tab['id'];[m
+[31m-            return Padding([m
+[31m-              padding: const EdgeInsets.only(right: 12),[m
+[31m-              child: GestureDetector([m
+[31m-                onTap: () {[m
+[31m-                  setState(() {[m
+[31m-                    _selectedDiscoveryTab = tab['id'] as String;[m
+[31m-                  });[m
+[31m-                },[m
+[31m-                child: Container([m
+[31m-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),[m
+[31m-                  decoration: BoxDecoration([m
+[31m-                    color: isSelected ? Colors.blue[600] : Colors.grey[100],[m
+[31m-                    borderRadius: BorderRadius.circular(20),[m
+[31m-                    border: Border.all([m
+[31m-                      color: isSelected ? Colors.blue[600]! : Colors.grey[300]!,[m
+[31m-                    ),[m
+[31m-                  ),[m
+[31m-                  child: Row([m
+[31m-                    mainAxisSize: MainAxisSize.min,[m
+[31m-                    children: [[m
+[31m-                      Icon([m
+[31m-                        tab['icon'] as IconData,[m
+[31m-                        size: 16,[m
+[31m-                        color: isSelected ? Colors.white : Colors.grey[600],[m
+[31m-                      ),[m
+[31m-                      const SizedBox(width: 6),[m
+[31m-                      Text([m
+[31m-                        tab['label'] as String,[m
+[31m-                        style: TextStyle([m
+[31m-                          color: isSelected ? Colors.white : Colors.grey[700],[m
+[31m-                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,[m
+[31m-                          fontSize: 14,[m
+[31m-                        ),[m
+[31m-                      ),[m
+[31m-                    ],[m
+[31m-                  ),[m
+[31m-                ),[m
+[31m-              ),[m
+[31m-            );[m
+[31m-          }).toList(),[m
+[31m-        ),[m
+[31m-      ),[m
+[31m-    );[m
+[31m-  }[m
+[31m-[m
+[31m-  Widget _buildDiscoveryContent(BuildContext context, DiscoverController controller) {[m
+[31m-    switch (_selectedDiscoveryTab) {[m
+[31m-      case 'trending':[m
+[31m-        return _buildTrendingContent(context, controller);[m
+[31m-      case 'nearby':[m
+[31m-        return _buildNearbyContent(context, controller);[m
+[31m-      case 'categories':[m
+[31m-        return _buildCategoriesContent(context, controller);[m
+[31m-      case 'time':[m
+[31m-        return _buildTimeContent(context, controller);[m
+[31m-      default:[m
+[31m-        return _buildTrendingContent(context, controller);[m
+[31m-    }[m
+[31m-  }[m
+[31m-[m
+[31m-  Widget _buildTrendingContent(BuildContext context, DiscoverController controller) {[m
+[31m-    return Column([m
+[31m-      crossAxisAlignment: CrossAxisAlignment.start,[m
+[32m+[m[32m    final screenHeight = MediaQuery.of(context).size.height;[m
+[32m+[m[32m    final mapHeight = screenHeight * 0.4; // 40% of screen height[m
+[32m+[m[41m    [m
+[32m+[m[32m    return Stack([m
+       children: [[m
+[31m-        // Hero section with featured event[m
+[31m-        _buildHeroSection(context),[m
+[31m-        const SizedBox(height: 20),[m
+[31m-        [m
+[31m-        // Quick discovery actions[m
+[31m-        _buildQuickDiscoveryActions(context),[m
+[31m-        const SizedBox(height: 20),[m
+[31m-        [m
+[31m-        // Trending events section[m
+[31m-        _buildTrendingEventsSection(context),[m
+[31m-        const SizedBox(height: 20),[m
+[31m-        [m
+[31m-        // Popular categories[m
+[31m-        _buildPopularCategoriesSection(context),[m
+[31m-        const SizedBox(height: 20),[m
+[31m-        [m
+[31m-        // All events list[m
+[31m-        _buildAllEventsSection(context),[m
+[31m-      ],[m
+[31m-    );[m
+[31m-  }[m
+[31m-[m
+[31m-  Widget _buildHeroSection(BuildContext context) {[m
+[31m-    return Container([m
+[31m-      margin: const EdgeInsets.symmetric(horizontal: 16),[m
+[31m-      height: 200,[m
+[31m-      decoration: BoxDecoration([m
+[31m-        borderRadius: BorderRadius.circular(16),[m
+[31m-        gradient: LinearGradient([m
+[31m-          colors: [Colors.blue[600]!, Colors.purple[600]!],[m
+[31m-          begin: Alignment.topLeft,[m
+[31m-          end: Alignment.bottomRight,[m
+[32m+[m[32m        // Map View (Top 40%)[m
+[32m+[m[32m        Positioned([m
+[32m+[m[32m          top: 0,[m
+[32m+[m[32m          left: 0,[m
+[32m+[m[32m          right: 0,[m
+[32m+[m[32m          height: mapHeight,[m
+[32m+[m[32m          child: _buildMapView(),[m
+         ),[m
+[31m-        boxShadow: [[m
+[31m-          BoxShadow([m
+[31m-            color: Colors.blue.withValues(alpha: 0.3),[m
+[31m-            blurRadius: 20,[m
+[31m-            offset: const Offset(0, 10),[m
+[31m-          ),[m
+[31m-        ],[m
+[31m-      ),[m
+[31m-      child: Stack([m
+[31m-        children: [[m
+[31m-          // Background pattern[m
+[31m-          Positioned.fill([m
+[31m-            child: Container([m
+[31m-              decoration: BoxDecoration([m
+[31m-                borderRadius: BorderRadius.circular(16),[m
+[31m-                image: const DecorationImage([m
+[31m-                  image: NetworkImage('https://images.unsplash.com/photo-1511578314322-379afb476865?w=400'),[m
+[31m-                  fit: BoxFit.cover,[m
+[31m-                  opacity: 0.3,[m
+[31m-                ),[m
+[31m-              ),[m
+[31m-            ),[m
+[31m-          ),[m
+[31m-          // Content[m
+[31m-          Padding([m
+[31m-            padding: const EdgeInsets.all(20),[m
+[31m-            child: Column([m
+[31m-              crossAxisAlignment: CrossAxisAlignment.start,[m
+[31m-              mainAxisAlignment: MainAxisAlignment.end,[m
+[31m-              children: [[m
+[31m-                Container([m
+[31m-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),[m
+[31m-                  decoration: BoxDecoration([m
+[31m-                    color: Colors.white.withValues(alpha: 0.2),[m
+[31m-                    borderRadius: BorderRadius.circular(12),[m
+[31m-                  ),[m
+[31m-                  child: const Text([m
+[31m-                    '🔥 TRENDING NOW',[m
+[31m-                    style: TextStyle([m
+[31m-                      color: Colors.white,[m
+[31m-                      fontSize: 12,[m
+[31m-                      fontWeight: FontWeight.bold,[m
+[31m-                    ),[m
+[31m-                  ),[m
+[31m-                ),[m
+[31m-                const SizedBox(height: 8),[m
+[31m-                const Text([m
+[31m-                  'Tech Meetup: AI & Machine Learning',[m
+[31m-                  style: TextStyle([m
+[31m-                    color: Colors.white,[m
+[31m-                    fontSize: 20,[m
+[31m-                    fontWeight: FontWeight.bold,[m
+[31m-                  ),[m
+[31m-                ),[m
+[31m-                const SizedBox(height: 4),[m
+[31m-                Row([m
+[31m-                  children: [[m
+[31m-                    const Icon(Icons.location_on, color: Colors.white, size: 16),[m
+[31m-                    const SizedBox(width: 4),[m
+[31m-                    Expanded([m
+[31m-                      child: Text([m
+[31m-                        'Downtown Tech Hub • 0.5 km',[m
+[31m-                        style: const TextStyle(color: Colors.white, fontSize: 14),[m
+[31m-                        overflow: TextOverflow.ellipsis,[m
+[31m-                      ),[m
+[31m-                    ),[m
+[31m-                    const SizedBox(width: 8),[m

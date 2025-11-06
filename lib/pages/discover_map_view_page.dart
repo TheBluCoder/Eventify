@@ -6,11 +6,13 @@ import '../controllers/location_controller.dart';
 import '../controllers/discover_controller.dart';
 
 class MapViewPage extends StatelessWidget {
-  const MapViewPage({super.key});
+  final DiscoverState discoverState;
+  
+  const MapViewPage({super.key, required this.discoverState});
 
   @override
   Widget build(BuildContext context) {
-    return const _OptimizedMapView();
+    return _OptimizedMapView(discoverState: discoverState);
   }
 }
 
@@ -19,7 +21,9 @@ class MapViewPage extends StatelessWidget {
 // ============================================
 
 class _OptimizedMapView extends StatelessWidget {
-  const _OptimizedMapView();
+  final DiscoverState discoverState;
+  
+  const _OptimizedMapView({required this.discoverState});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +36,7 @@ class _OptimizedMapView extends StatelessWidget {
         }
         return child!;
       },
-      child: const _MapContent(),
+      child: _MapContent(discoverState: discoverState),
     );
   }
 
@@ -55,28 +59,26 @@ class _OptimizedMapView extends StatelessWidget {
 }
 
 class _MapContent extends StatelessWidget {
-  const _MapContent();
+  final DiscoverState discoverState;
+  
+  const _MapContent({required this.discoverState});
 
   @override
   Widget build(BuildContext context) {
     // Only rebuilds when markers or location changes
-    return Selector2<DiscoverController, LocationController,
-        ({Set<Marker> markers, LatLng? location})>(
-      selector: (_, discoverController, locationController) => (
-        markers: discoverController.markers,
-        location: locationController.userLocationCoords,
-      ),
-      builder: (context, data, child) {
-        if (data.location == null) {
+    return Selector<LocationController, LatLng?>(
+      selector: (_, locationController) => locationController.userLocationCoords,
+      builder: (context, location, child) {
+        if (location == null) {
           return const Center(child: CircularProgressIndicator());
         }
         
         return Stack(
           children: [
             GoogleMap(
-              onMapCreated: context.read<DiscoverController>().onMapCreated,
+              onMapCreated: discoverState.onMapCreated,
               initialCameraPosition: CameraPosition(
-                target: data.location!, // Use data from selector
+                target: location,
                 zoom: 13.0,
               ),
               myLocationEnabled: true,
@@ -84,7 +86,7 @@ class _MapContent extends StatelessWidget {
               zoomControlsEnabled: false,
               mapToolbarEnabled: false,
               mapType: MapType.normal,
-              markers: data.markers, // Use data from selector
+              markers: discoverState.markers,
             ),
             SafeArea(
               child: Column(
@@ -126,7 +128,7 @@ class _MapContent extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   GestureDetector(
-                    onTap: context.read<DiscoverController>().onFilterPressed,
+                    onTap: discoverState.onFilterPressed,
                     child: const Icon(
                       Icons.filter_list_outlined,
                       color: Color.fromARGB(255, 15, 15, 15),
@@ -137,8 +139,7 @@ class _MapContent extends StatelessWidget {
                   GestureDetector(
                     onTap: () {
                       final locationController = context.read<LocationController>();
-                      final discoverController = context.read<DiscoverController>();
-                      discoverController.onRecenterPressed(locationController.userLocationCoords);
+                      discoverState.onRecenterPressed(locationController.userLocationCoords);
                     },
                     child: const Icon(
                       Icons.my_location_outlined,
