@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import '../controllers/location_controller.dart';
 import '../controllers/discover_controller.dart';
@@ -54,6 +55,9 @@ class _DiscoverPageState extends State<DiscoverPage> {
 
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
+      actionsIconTheme: IconThemeData(
+        color: Colors.grey[700],
+      ),
       actionsPadding: EdgeInsets.only(bottom: 10),
       title: Padding(
         padding: const EdgeInsets.only(bottom: 10.0),
@@ -113,6 +117,19 @@ class _DiscoverPageState extends State<DiscoverPage> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Location selector button
+              IconButton(
+                onPressed: () {
+                  _showLocationSelectorModal(context);
+                },
+                icon: Icon(
+                  Icons.location_city_outlined,
+                  color: Colors.grey[700],
+                ),
+                padding: const EdgeInsets.all(8),
+                constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                tooltip: 'Select City/Country',
+              ),
               // Search button
               IconButton(
                 onPressed: () {
@@ -121,17 +138,12 @@ class _DiscoverPageState extends State<DiscoverPage> {
                 icon: Icon(
                   Icons.search_outlined,
                   color: Colors.grey[700],
-                  size: 24,
                 ),
                 padding: const EdgeInsets.all(8),
                 constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
               ),
-              Container(width: 1, height: 24, color: Colors.grey[300]),
               // View toggle button
-              Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: _buildViewToggle(context),
-              ),
+              _buildViewToggle(context),
             ],
           ),
         ),
@@ -183,6 +195,87 @@ class _DiscoverPageState extends State<DiscoverPage> {
     );
   }
 
+
+  void _showLocationSelectorModal(BuildContext context) {
+    final popularCities = [
+      {'name': 'Lagos, Nigeria', 'lat': 6.5244, 'lng': 3.3792},
+      {'name': 'Abuja, Nigeria', 'lat': 9.0765, 'lng': 7.3986},
+      {'name': 'Port Harcourt, Nigeria', 'lat': 4.8156, 'lng': 7.0498},
+      {'name': 'Ibadan, Nigeria', 'lat': 7.3775, 'lng': 3.9470},
+      {'name': 'Kano, Nigeria', 'lat': 12.0022, 'lng': 8.5919},
+      {'name': 'Accra, Ghana', 'lat': 5.6037, 'lng': -0.1870},
+      {'name': 'Nairobi, Kenya', 'lat': -1.2921, 'lng': 36.8219},
+      {'name': 'Cairo, Egypt', 'lat': 30.0444, 'lng': 31.2357},
+      {'name': 'Johannesburg, South Africa', 'lat': -26.2041, 'lng': 28.0473},
+      {'name': 'Cape Town, South Africa', 'lat': -33.9249, 'lng': 18.4241},
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Select Location',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Choose a city or country to discover events',
+              style: TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Popular Cities',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 12),
+            Flexible(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: popularCities.length,
+                itemBuilder: (context, index) {
+                  final city = popularCities[index];
+                  return ListTile(
+                    leading: const Icon(Icons.location_city, color: Colors.blue),
+                    title: Text(city['name'] as String),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      // Set pin location to selected city
+                      final location = LatLng(
+                        city['lat'] as double,
+                        city['lng'] as double,
+                      );
+                      _discoverState.setPinLocation(location);
+                      _discoverState.updateLocationName(city['name'] as String);
+                      Navigator.pop(context);
+                    },
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
 
   void _showAdvancedSearchModal(BuildContext context) {
     showModalBottomSheet(

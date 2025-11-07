@@ -77,6 +77,10 @@ class _MapContent extends StatelessWidget {
           children: [
             GoogleMap(
               onMapCreated: discoverState.onMapCreated,
+              onTap: (LatLng position) {
+                // Place or update pin on map tap
+                discoverState.setPinLocation(position);
+              },
               initialCameraPosition: CameraPosition(
                 target: location,
                 zoom: 13.0,
@@ -128,10 +132,22 @@ class _MapContent extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   GestureDetector(
-                    onTap: discoverState.onFilterPressed,
-                    child: const Icon(
-                      Icons.filter_list_outlined,
-                      color: Color.fromARGB(255, 15, 15, 15),
+                    onTap: () {
+                      // Toggle pin placement mode
+                      final locationController = context.read<LocationController>();
+                      if (discoverState.pinLocation != null) {
+                        discoverState.clearPinLocation();
+                      } else if (locationController.userLocationCoords != null) {
+                        discoverState.setPinLocation(locationController.userLocationCoords!);
+                      }
+                    },
+                    child: Icon(
+                      discoverState.pinLocation != null 
+                        ? Icons.location_on 
+                        : Icons.location_on_outlined,
+                      color: discoverState.pinLocation != null
+                        ? Colors.blue
+                        : const Color.fromARGB(255, 15, 15, 15),
                       size: 25,
                     ),
                   ),

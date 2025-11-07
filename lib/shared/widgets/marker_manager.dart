@@ -47,4 +47,30 @@ class MarkerManager {
       return null;
     }
   }
+
+  /// Creates a discovery pin marker (draggable)
+  /// onDragEnd callback should be provided when creating the marker
+  Marker createPinMarker(LatLng position, {Function(LatLng)? onDragEnd}) {
+    return Marker(
+      markerId: const MarkerId('discovery_pin'),
+      position: position,
+      draggable: true,
+      infoWindow: const InfoWindow(title: 'Discovery Location'),
+      icon: BitmapDescriptor.defaultMarkerWithHue(
+        BitmapDescriptor.hueRed,
+      ),
+      onDragEnd: onDragEnd ?? (LatLng position) {},
+    );
+  }
+
+  /// Adds or updates the discovery pin marker
+  void updatePinMarker(LatLng position, {Function(LatLng)? onDragEnd}) {
+    _markers.removeWhere((m) => m.markerId == const MarkerId('discovery_pin'));
+    _markers.add(createPinMarker(position, onDragEnd: onDragEnd));
+  }
+
+  /// Removes the discovery pin marker
+  void removePinMarker() {
+    _markers.removeWhere((m) => m.markerId == const MarkerId('discovery_pin'));
+  }
 }

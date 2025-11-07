@@ -5,6 +5,7 @@ import '../controllers/discover_controller.dart';
 import '../controllers/location_controller.dart';
 import '../shared/models/event_model.dart';
 import '../shared/data/placeholder.dart';
+import 'events_list_page.dart';
 
 class DiscoverFeedView extends StatefulWidget {
   final DiscoverState discoverState;
@@ -27,6 +28,7 @@ class _DiscoverFeedViewState extends State<DiscoverFeedView> {
 
   // Mock data for events
   final List<EventModel> _events = PlaceholderData.discoverEvents;
+  final List<EventModel> _trendingEvents = PlaceholderData.trendingEvents;
 
   final List<String> _categories = PlaceholderData.discoverCategories;
 
@@ -99,6 +101,49 @@ class _DiscoverFeedViewState extends State<DiscoverFeedView> {
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           children: [
                             const SizedBox(height: 8),
+                            // Trending Events Section
+                            if (_trendingEvents.isNotEmpty) ...[
+                              _buildTrendingSection(),
+                              const SizedBox(height: 16),
+                              // Divider after trending
+                              Divider(height: 1, color: Colors.grey[200]),
+                              const SizedBox(height: 8),
+                              // Nearby header
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 4),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => EventsListPage(
+                                          title: 'Nearby Events',
+                                          events: _events,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Nearby',
+                                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.grey[700],
+                                        ),
+                                      ),
+                                      Icon(Icons.arrow_forward_ios_outlined, size: 16),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              // Divider after nearby header
+                              Divider(height: 1, color: Colors.grey[200]),
+                              const SizedBox(height: 16),
+                            ],
+                            // Regular Events
                             ..._events.map((event) => Padding(
                               padding: const EdgeInsets.only(bottom: 16),
                               child: _buildEventCard(event),
@@ -135,6 +180,10 @@ class _DiscoverFeedViewState extends State<DiscoverFeedView> {
             // Google Map
             GoogleMap(
               onMapCreated: widget.discoverState.onMapCreated,
+              onTap: (LatLng position) {
+                // Place or update pin on map tap
+                widget.discoverState.setPinLocation(position);
+              },
               initialCameraPosition: CameraPosition(
                 target: locationController.userLocationCoords!,
                 zoom: 13.0,
@@ -171,10 +220,21 @@ class _DiscoverFeedViewState extends State<DiscoverFeedView> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           GestureDetector(
-                            onTap: widget.discoverState.onFilterPressed,
-                            child: const Icon(
-                              Icons.filter_list_outlined,
-                              color: Color.fromARGB(255, 15, 15, 15),
+                            onTap: () {
+                              // Toggle pin placement mode
+                              if (widget.discoverState.pinLocation != null) {
+                                widget.discoverState.clearPinLocation();
+                              } else if (locationController.userLocationCoords != null) {
+                                widget.discoverState.setPinLocation(locationController.userLocationCoords!);
+                              }
+                            },
+                            child: Icon(
+                              widget.discoverState.pinLocation != null 
+                                ? Icons.location_on 
+                                : Icons.location_on_outlined,
+                              color: widget.discoverState.pinLocation != null
+                                ? Colors.red[600]
+                                : const Color.fromARGB(255, 15, 15, 15),
                               size: 25,
                             ),
                           ),
@@ -201,6 +261,196 @@ class _DiscoverFeedViewState extends State<DiscoverFeedView> {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildTrendingSection() {
+    if (_trendingEvents.isEmpty) return const SizedBox.shrink();
+    
+    final firstTrendingEvent = _trendingEvents.first;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+          child: Row(
+            children: [
+              Icon(Icons.trending_up, size: 18, color: Colors.orange[600]),
+              const SizedBox(width: 6),
+              Text(
+                'Trending Now',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
+        ),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => EventsListPage(
+                  title: 'Trending Events',
+                  events: _trendingEvents,
+                ),
+              ),
+            );
+          },
+          child: Container(
+            height: 200,
+            margin: const EdgeInsets.only(bottom: 8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.orange[200]!),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.orange.withValues(alpha: 0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // Event Image
+                  Image.network(
+                    firstTrendingEvent.mediaUrl,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Container(
+                        color: Colors.grey[300],
+                        child: const Center(
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: Colors.grey[200],
+                        child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                      );
+                    },
+                  ),
+                  // Gradient overlay
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withValues(alpha: 0.7),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Content
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // Trending badge
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.orange[600],
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.trending_up, size: 12, color: Colors.white),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'Trending',
+                                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                // Title
+                                Text(
+                                  firstTrendingEvent.title,
+                                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 4),
+                                // Stats
+                                Row(
+                                  children: [
+                                    Icon(Icons.person_outline, size: 12, color: Colors.white70),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '${firstTrendingEvent.interestedCount}',
+                                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                        color: Colors.white70,
+                                        fontSize: 11,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Icon(Icons.location_on, size: 12, color: Colors.white70),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: Text(
+                                        firstTrendingEvent.location,
+                                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                          color: Colors.white70,
+                                          fontSize: 11,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Arrow icon
+                          Icon(
+                            Icons.arrow_forward_ios_outlined,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

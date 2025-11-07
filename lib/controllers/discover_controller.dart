@@ -22,6 +22,9 @@ class DiscoverState {
   String _priceFilter = 'All';
   bool _verifiedOnly = false;
   String _sortBy = 'Distance';
+  
+  // Pin location for discovery
+  LatLng? _pinLocation;
 
   DiscoverState({
     MarkerManager? markerManager,
@@ -41,6 +44,7 @@ class DiscoverState {
   String get priceFilter => _priceFilter;
   bool get verifiedOnly => _verifiedOnly;
   String get sortBy => _sortBy;
+  LatLng? get pinLocation => _pinLocation;
   
   bool get hasActiveFilters => 
     _selectedCategory != 'All' ||
@@ -141,6 +145,32 @@ class DiscoverState {
 
   void updateLocationName(String name) {
     _locationName = name;
+  }
+
+  /// Sets the pin location for discovery
+  void setPinLocation(LatLng location) {
+    _pinLocation = location;
+    _markerManager.updatePinMarker(
+      location,
+      onDragEnd: onPinDragEnd,
+    );
+    // Animate camera to pin location
+    _mapControllerWrapper.animateCameraToPosition(location);
+    // Update location name based on pin location
+    // TODO: Implement reverse geocoding to get location name
+    _updateEventCount();
+  }
+
+  /// Clears the pin location (revert to user location)
+  void clearPinLocation() {
+    _pinLocation = null;
+    _markerManager.removePinMarker();
+    _updateEventCount();
+  }
+
+  /// Handles pin drag end
+  void onPinDragEnd(LatLng newPosition) {
+    setPinLocation(newPosition);
   }
 
   // Mock method to update event count based on filters

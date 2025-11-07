@@ -179,6 +179,21 @@ class PlaceholderData {
     'Music & Concerts',
   ];
 
+  /// Trending events (based on interestedCount, sharesCount, and recency)
+  static List<EventModel> get trendingEvents {
+    final allEvents = [...discoverEvents, ...followingEvents, ...forYouEvents];
+    // Sort by trending score: interestedCount * 2 + sharesCount * 3 + recency bonus
+    final now = DateTime.now();
+    final scoredEvents = allEvents.map((event) {
+      final hoursUntilEvent = event.dateTime.difference(now).inHours;
+      final recencyBonus = hoursUntilEvent > 0 && hoursUntilEvent < 48 ? 10 : 0;
+      final trendingScore = (event.interestedCount * 2) + (event.sharesCount * 3) + recencyBonus;
+      return MapEntry(event, trendingScore);
+    }).toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    return scoredEvents.map((e) => e.key).take(5).toList();
+  }
+
   // ============================================
   // User Data
   // ============================================
