@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '../shared/widgets/marker_manager.dart';
-import '../shared/widgets/map_controller_wrapper.dart';
+import '../core/utils/marker_manager.dart';
+import '../core/utils/map_controller_wrapper.dart';
+import '../shared/data/placeholder.dart';
 
 /// State class for DiscoverPage logic
 /// Handles map-specific functionality and view switching
@@ -68,9 +69,48 @@ class DiscoverState {
     _isMapView = false;
   }
 
-  /// Sets the map controller
+  /// Sets the map controller and loads event markers
   void onMapCreated(GoogleMapController controller) {
     _mapControllerWrapper.setController(controller);
+    _loadEventMarkers();
+  }
+
+  /// Loads event markers with custom icons
+  Future<void> _loadEventMarkers() async {
+    // Get all discover events
+    final events = PlaceholderData.discoverEvents;
+    
+    // Clear existing event markers
+    _markerManager.clearEventMarkers();
+    
+    // Create markers for each event
+    for (final event in events) {
+      try {
+        // Get custom marker icon from event's mediaUrl
+        // Creates a circular marker with white border and shadow
+        final customIcon = await MarkerManager.getCustomMarkerIcon(
+          imageUrl: event.mediaUrl,
+          size: const Size(48, 48),
+          isCircular: true,
+          borderWidth: 2.0,
+          borderColor: Colors.white,
+          shadowBlur: 4.0,
+        );
+        
+        // Create event marker
+        final marker = _markerManager.createEventMarker(
+          eventId: event.id,
+          position: LatLng(event.latitude, event.longitude),
+          title: event.title,
+          icon: customIcon,
+        );
+        
+        // Add marker to the set
+        _markerManager.addEventMarker(marker);
+      } catch (e) {
+        debugPrint('Error creating marker for event ${event.id}: $e');
+      }
+    }
   }
 
   /// Handles recenter button press

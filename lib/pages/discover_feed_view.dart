@@ -5,16 +5,24 @@ import '../controllers/discover_controller.dart';
 import '../controllers/location_controller.dart';
 import '../shared/models/event_model.dart';
 import '../shared/data/placeholder.dart';
+import '../app/app_constants.dart';
+import '../app/app_theme.dart';
+import '../shared/widgets/divider_section_header.dart';
+import '../shared/widgets/distance_badge.dart';
+import '../shared/widgets/image_loading_widget.dart';
+import '../shared/widgets/shared_map_widget.dart';
 import 'events_list_page.dart';
 
 class DiscoverFeedView extends StatefulWidget {
   final DiscoverState discoverState;
   final Function(DiscoverState) onStateChanged;
+  final Function(double)? onSheetPositionChanged;
   
   const DiscoverFeedView({
     super.key, 
     required this.discoverState,
     required this.onStateChanged,
+    this.onSheetPositionChanged,
   });
 
   @override
@@ -33,7 +41,22 @@ class _DiscoverFeedViewState extends State<DiscoverFeedView> {
   final List<String> _categories = PlaceholderData.discoverCategories;
 
   @override
+  void initState() {
+    super.initState();
+    // Listen to sheet position changes
+    _sheetController.addListener(_onSheetPositionChanged);
+  }
+
+  void _onSheetPositionChanged() {
+    if (widget.onSheetPositionChanged != null) {
+      final position = _sheetController.size;
+      widget.onSheetPositionChanged!(position);
+    }
+  }
+
+  @override
   void dispose() {
+    _sheetController.removeListener(_onSheetPositionChanged);
     _scrollController.dispose();
     _sheetController.dispose();
     super.dispose();
@@ -42,7 +65,7 @@ class _DiscoverFeedViewState extends State<DiscoverFeedView> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    final mapHeight = screenHeight * 0.4; // 40% of screen height
+    final mapHeight = screenHeight * AppConstants.mapHeightPercentage;
     
     return Stack(
       children: [
@@ -57,20 +80,22 @@ class _DiscoverFeedViewState extends State<DiscoverFeedView> {
         // Draggable Sheet with Event List
         DraggableScrollableSheet(
           controller: _sheetController,
-          initialChildSize: 0.6, // Start at 60% (leaving 40% for map)
-          minChildSize: 0.6, // Minimum 60% (map still visible)
-          maxChildSize: 0.98, // Maximum 98% (almost full screen)
+          initialChildSize: AppConstants.sheetInitialSize,
+          minChildSize: AppConstants.sheetMinSize,
+          maxChildSize: AppConstants.sheetMaxSize,
           builder: (context, scrollController) {
             return ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 1000),
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(AppConstants.borderRadiusL),
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 10,
+                      blurRadius: AppConstants.shadowBlurL,
                       offset: const Offset(0, -2),
                     ),
                   ],
@@ -79,12 +104,15 @@ class _DiscoverFeedViewState extends State<DiscoverFeedView> {
                   children: [
                     // Drag Handle
                     Container(
-                      margin: const EdgeInsets.only(top: 8, bottom: 8),
-                      width: 40,
-                      height: 4,
+                      margin: const EdgeInsets.only(
+                        top: AppConstants.paddingM,
+                        bottom: AppConstants.paddingM,
+                      ),
+                      width: AppConstants.dragHandleWidth,
+                      height: AppConstants.dragHandleHeight,
                       decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(2),
+                        color: AppTheme.grey300,
+                        borderRadius: BorderRadius.circular(AppConstants.paddingXS),
                       ),
                     ),
                     // Category filters
@@ -94,54 +122,36 @@ class _DiscoverFeedViewState extends State<DiscoverFeedView> {
                     Expanded(
                       child: RefreshIndicator(
                         onRefresh: () async {
-                          await Future.delayed(const Duration(seconds: 1));
+                          await Future.delayed(AppConstants.refreshDelay);
                         },
                         child: ListView(
                           controller: scrollController,
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppConstants.spacingXL,
+                          ),
                           children: [
                             const SizedBox(height: 8),
                             // Trending Events Section
                             if (_trendingEvents.isNotEmpty) ...[
                               _buildTrendingSection(),
-                              const SizedBox(height: 16),
-                              // Divider after trending
-                              Divider(height: 1, color: Colors.grey[200]),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: AppConstants.spacingXL),
                               // Nearby header
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 4),
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => EventsListPage(
-                                          title: 'Nearby Events',
-                                          events: _events,
-                                        ),
+                              DividerSectionHeader(
+                                title: 'Nearby',
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => EventsListPage(
+                                        title: 'Nearby Events',
+                                        events: _events,
                                       ),
-                                    );
-                                  },
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        'Nearby',
-                                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.grey[700],
-                                        ),
-                                      ),
-                                      Icon(Icons.arrow_forward_ios_outlined, size: 16),
-                                    ],
-                                  ),
-                                ),
+                                    ),
+                                  );
+                                },
+                                padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingS),
                               ),
-                              const SizedBox(height: 8),
-                              // Divider after nearby header
-                              Divider(height: 1, color: Colors.grey[200]),
-                              const SizedBox(height: 16),
+                              const SizedBox(height: AppConstants.spacingXL),
                             ],
                             // Regular Events
                             ..._events.map((event) => Padding(
@@ -175,90 +185,13 @@ class _DiscoverFeedViewState extends State<DiscoverFeedView> {
           );
         }
 
-        return Stack(
-          children: [
-            // Google Map
-            GoogleMap(
-              onMapCreated: widget.discoverState.onMapCreated,
-              onTap: (LatLng position) {
-                // Place or update pin on map tap
-                widget.discoverState.setPinLocation(position);
-              },
-              initialCameraPosition: CameraPosition(
-                target: locationController.userLocationCoords!,
-                zoom: 13.0,
-              ),
-              myLocationEnabled: true,
-              myLocationButtonEnabled: false,
-              zoomControlsEnabled: false,
-              mapToolbarEnabled: false,
-              mapType: MapType.normal,
-              markers: widget.discoverState.markers,
-            ),
-            // Map Controls (Bottom Right)
-            Positioned(
-              bottom: 16,
-              right: 16,
-              child: SafeArea(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                      decoration: BoxDecoration(
-                        color: Colors.white70,
-                        borderRadius: BorderRadius.circular(25),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              // Toggle pin placement mode
-                              if (widget.discoverState.pinLocation != null) {
-                                widget.discoverState.clearPinLocation();
-                              } else if (locationController.userLocationCoords != null) {
-                                widget.discoverState.setPinLocation(locationController.userLocationCoords!);
-                              }
-                            },
-                            child: Icon(
-                              widget.discoverState.pinLocation != null 
-                                ? Icons.location_on 
-                                : Icons.location_on_outlined,
-                              color: widget.discoverState.pinLocation != null
-                                ? Colors.red[600]
-                                : const Color.fromARGB(255, 15, 15, 15),
-                              size: 25,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          GestureDetector(
-                            onTap: () {
-                              widget.discoverState.onRecenterPressed(
-                                locationController.userLocationCoords!,
-                              );
-                            },
-                            child: const Icon(
-                              Icons.my_location_outlined,
-                              color: Color.fromARGB(255, 15, 15, 15),
-                              size: 20,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+        return SharedMapWidget(
+          discoverState: widget.discoverState,
+          onMapTap: (LatLng position) {
+            // Place or update pin on map tap
+            widget.discoverState.setPinLocation(position);
+          },
+          controlsPadding: const EdgeInsets.only(right: 16, bottom: 16),
         );
       },
     );
@@ -372,13 +305,13 @@ class _DiscoverFeedViewState extends State<DiscoverFeedView> {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
-                                    color: Colors.orange[600],
+                                    color: Colors.grey[600]!.withAlpha(50),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(Icons.trending_up, size: 12, color: Colors.white),
+                                      Icon(Icons.trending_up, size: 12, color: Colors.orange[600]),
                                       const SizedBox(width: 4),
                                       Text(
                                         'Trending',
@@ -456,8 +389,8 @@ class _DiscoverFeedViewState extends State<DiscoverFeedView> {
 
   Widget _buildCategoryFilters() {
     return Container(
-      height: 40,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      height: AppConstants.categoryFilterHeight,
+      padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingXL),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: _categories.length,
@@ -475,18 +408,18 @@ class _DiscoverFeedViewState extends State<DiscoverFeedView> {
                   _selectedCategory = category;
                 });
               },
-              selectedColor: Colors.blue[600],
+              selectedColor: AppTheme.blue600,
               checkmarkColor: Colors.white,
               labelStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: isSelected ? Colors.white : Colors.grey[700],
+                color: isSelected ? Colors.white : AppTheme.grey700,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               ),
               backgroundColor: Colors.white,
               side: BorderSide(
-                color: isSelected ? Colors.blue[600]! : Colors.grey[300]!,
+                color: isSelected ? AppTheme.blue600 : AppTheme.grey300,
               ),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(AppConstants.borderRadiusL),
               ),
             ),
           );
@@ -499,15 +432,9 @@ class _DiscoverFeedViewState extends State<DiscoverFeedView> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[300]!),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(AppConstants.borderRadiusM),
+        border: Border.all(color: AppTheme.grey300),
+        boxShadow: AppTheme.shadowSmall,
       ),
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -516,42 +443,15 @@ class _DiscoverFeedViewState extends State<DiscoverFeedView> {
           children: [
             // Event Image
             ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppConstants.borderRadiusXS),
               child: Stack(
                 children: [
-                  Image.network(
-                    event.mediaUrl,
-                    width: 100,
-                    height: 100,
+                  ImageLoadingWidget(
+                    imageUrl: event.mediaUrl,
+                    width: AppConstants.cardImageWidth,
+                    height: AppConstants.cardImageHeight,
                     fit: BoxFit.cover,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Container(
-                        width: 100,
-                        height: 100,
-                        color: Colors.grey[300],
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                    loadingProgress.expectedTotalBytes!
-                                : null,
-                            strokeWidth: 2,
-                          ),
-                        ),
-                      );
-                    },
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        width: 100,
-                        height: 100,
-                        color: Colors.grey[200],
-                        child: const Icon(
-                          Icons.image_not_supported,
-                          color: Colors.grey,
-                        ),
-                      );
-                    },
+                    errorIconSize: AppConstants.iconSizeHuge,
                   ),
                   if (event.isVideo)
                     Positioned.fill(
@@ -566,22 +466,16 @@ class _DiscoverFeedViewState extends State<DiscoverFeedView> {
                     ),
                   // Distance badge
                   Positioned(
-                    top: 4,
-                    right: 4,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.blue[600],
-                        borderRadius: BorderRadius.circular(8),
+                    top: AppConstants.paddingS,
+                    right: AppConstants.paddingS,
+                    child: DistanceBadge(
+                      distance: event.formattedDistance,
+                      fontSize: AppConstants.fontSizeS,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppConstants.spacingS,
+                        vertical: AppConstants.paddingXS,
                       ),
-                      child: Text(
-                        event.formattedDistance,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                      borderRadius: AppConstants.borderRadiusXS,
                     ),
                   ),
                 ],

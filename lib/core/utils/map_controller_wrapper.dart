@@ -42,3 +42,4 @@ class MapControllerWrapper {
   /// Checks if controller is initialized
   bool get isInitialized => _controller != null;
 }
+
