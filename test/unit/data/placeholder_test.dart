@@ -15,7 +15,7 @@ void main() {
           expect(event.description, isNotEmpty);
           expect(event.organizerUsername, isNotEmpty);
           expect(event.location, isNotEmpty);
-          expect(event.attendeeCount, greaterThan(0));
+          expect(event.interestedCount, greaterThan(0));
           expect(event.tags, isNotEmpty);
           expect(event.mediaUrl, isNotEmpty);
         }
@@ -40,15 +40,15 @@ void main() {
         expect(firstEvent.id, '1');
         expect(firstEvent.isRSVP, isTrue);
         expect(firstEvent.isLiked, isTrue);
-        expect(firstEvent.likesCount, 42);
+        // likesCount has been removed from EventModel
       });
 
       test('second event should be Music Concert Night', () {
         final secondEvent = PlaceholderData.followingEvents[1];
-        expect(secondEvent.title, 'Music Concert Night');
+        expect(secondEvent.title, 'Music Concert Night and day and more party and stuff');
         expect(secondEvent.id, '2');
         expect(secondEvent.isSaved, isTrue);
-        expect(secondEvent.likesCount, 67);
+        // likesCount has been removed from EventModel
       });
     });
 
@@ -64,7 +64,7 @@ void main() {
           expect(event.description, isNotEmpty);
           expect(event.organizerUsername, isNotEmpty);
           expect(event.location, isNotEmpty);
-          expect(event.attendeeCount, greaterThan(0));
+          expect(event.interestedCount, greaterThan(0));
           expect(event.tags, isNotEmpty);
           expect(event.mediaUrl, isNotEmpty);
         }
@@ -111,7 +111,7 @@ void main() {
           expect(event.description, isNotEmpty);
           expect(event.organizerUsername, isNotEmpty);
           expect(event.location, isNotEmpty);
-          expect(event.attendeeCount, greaterThan(0));
+          expect(event.interestedCount, greaterThan(0));
           expect(event.tags, isNotEmpty);
           expect(event.mediaUrl, isNotEmpty);
         }
@@ -136,7 +136,7 @@ void main() {
       test('should have variety of event types', () {
         final titles = PlaceholderData.discoverEvents.map((e) => e.title).toList();
         expect(titles, contains('Lotal Bands Night'));
-        expect(titles, contains('Music Concert Night'));
+        expect(titles, contains('Music Concert Night and day and more party and stuff'));
         expect(titles, contains('Tech Meetup'));
         expect(titles, contains('Art Gallery Opening'));
         expect(titles, contains('Food Festival'));
@@ -145,7 +145,7 @@ void main() {
       test('last event should have highest attendee count', () {
         final lastEvent = PlaceholderData.discoverEvents.last;
         expect(lastEvent.title, 'Food Festival');
-        expect(lastEvent.attendeeCount, 50);
+        expect(lastEvent.interestedCount, 50);
       });
     });
 

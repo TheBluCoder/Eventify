@@ -7,6 +7,8 @@ class EventModel {
   final DateTime dateTime;
   final String location;
   final double distanceKm;
+  final double latitude; // Map coordinate latitude
+  final double longitude; // Map coordinate longitude
   final int interestedCount;
   final List<String> tags;
   final String mediaUrl; // Can be either image or video URL
@@ -30,6 +32,8 @@ class EventModel {
     required this.dateTime,
     required this.location,
     required this.distanceKm,
+    required this.latitude,
+    required this.longitude,
     required this.tags,
     required this.mediaUrl,
     this.isVideo = false,

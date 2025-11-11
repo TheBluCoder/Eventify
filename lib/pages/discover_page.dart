@@ -4,6 +4,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import '../controllers/location_controller.dart';
 import '../controllers/discover_controller.dart';
+import '../app/app_constants.dart';
+import '../app/app_theme.dart';
 import 'discover_map_view_page.dart';
 import 'discover_feed_view.dart';
 
@@ -18,6 +20,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
   final TextEditingController _searchController = TextEditingController();
   late DiscoverState _discoverState;
   late List<Widget> _views;
+  double _appBarOpacity = 1.0;
 
   @override
   void initState() {
@@ -30,6 +33,27 @@ class _DiscoverPageState extends State<DiscoverPage> {
           setState(() {
             // State is already updated in place, just trigger rebuild
           });
+        },
+        onSheetPositionChanged: (position) {
+          // Only update opacity when in feed view (not map view)
+          if (!_discoverState.isMapView) {
+            setState(() {
+              // Calculate opacity based on sheet position
+              // Sheet minChildSize: 0.6, maxChildSize: 0.98
+              // When sheet is at 0.6, opacity = 1.0 (fully visible)
+              // When sheet is at 0.98, opacity = 0.0 (fully hidden)
+              const minSize = AppConstants.sheetMinSize;
+              const maxSize = AppConstants.sheetMaxSize;
+              if (position <= minSize) {
+                _appBarOpacity = 1.0;
+              } else if (position >= maxSize) {
+                _appBarOpacity = 0.0;
+              } else {
+                // Linear interpolation between min and max
+                _appBarOpacity = 1.0 - ((position - minSize) / (maxSize - minSize));
+              }
+            });
+          }
         },
       ),
       MapViewPage(discoverState: _discoverState),
@@ -53,66 +77,63 @@ class _DiscoverPageState extends State<DiscoverPage> {
     );
   }
 
-  AppBar _buildAppBar(BuildContext context) {
-    return AppBar(
-      actionsIconTheme: IconThemeData(
-        color: Colors.grey[700],
-      ),
-      actionsPadding: EdgeInsets.only(bottom: 10),
-      title: Padding(
-        padding: const EdgeInsets.only(bottom: 10.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Discover",
-              style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                fontWeight: FontWeight.w600,
-                fontFamily: "Roboto",
-              ),
-            ),
-            Text(
-              "Explore events around you",
-              style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                color: const Color.fromARGB(255, 97, 97, 97),
-              ),
-            ),
-          ],
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
+    final appBar = AppBar(
+        actionsIconTheme: IconThemeData(
+          color: Colors.grey[700],
         ),
-      ),
-      backgroundColor: Colors.transparent,
-      surfaceTintColor: null,
-      elevation: 0,
-      flexibleSpace: ClipRRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 1.5, sigmaY: 1.5),
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.black.withValues(alpha: 0.4),
-                  Colors.transparent,
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
+        actionsPadding: EdgeInsets.only(bottom: 10),
+        title: Padding(
+          padding: const EdgeInsets.only(bottom: 10.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Discover",
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                  fontWeight: FontWeight.w600,
+                  fontFamily: "Roboto",
+                ),
+              ),
+              Text(
+                "Explore events around you",
+                style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                  color: const Color.fromARGB(255, 97, 97, 97),
+                ),
+              ),
+            ],
+          ),
+        ),
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: null,
+        elevation: 0,
+        flexibleSpace: ClipRRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(
+              sigmaX: AppConstants.blurSigma,
+              sigmaY: AppConstants.blurSigma,
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.black.withValues(alpha: 0.4),
+                    Colors.transparent,
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
               ),
             ),
           ),
         ),
-      ),
       actions: [
         Container(
           margin: const EdgeInsets.only(right: 12),
           decoration: BoxDecoration(
-            color: Colors.white60,
+            color: Colors.white30,
             borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Color.fromARGB(221, 20, 20, 20).withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            boxShadow: AppTheme.shadowMedium,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -148,6 +169,27 @@ class _DiscoverPageState extends State<DiscoverPage> {
           ),
         ),
       ],
+    );
+    
+    final normalHeight = appBar.preferredSize.height;
+    // When opacity is 0, completely hide the AppBar (height = 0)
+    // When opacity > 0, show it with animated height
+    final isHidden = _appBarOpacity <= 0.0;
+    final currentHeight = isHidden ? 0.0 : normalHeight;
+    
+    return PreferredSize(
+      preferredSize: Size.fromHeight(currentHeight),
+      child: AnimatedSize(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        child: isHidden
+            ? const SizedBox.shrink()
+            : AnimatedOpacity(
+                opacity: _appBarOpacity,
+                duration: const Duration(milliseconds: 200),
+                child: appBar,
+              ),
+      ),
     );
   }
 
@@ -185,6 +227,15 @@ class _DiscoverPageState extends State<DiscoverPage> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         setState(() {
           _discoverState.updateUserLocationMarker(locationController.userLocationCoords!);
+        });
+      });
+    }
+
+    // Reset AppBar opacity when switching to map view
+    if (_discoverState.isMapView && _appBarOpacity != 1.0) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {
+          _appBarOpacity = 1.0;
         });
       });
     }
@@ -301,7 +352,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                 hintText: 'Search for events, locations, or categories...',
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppConstants.borderRadiusM),
                 ),
                 filled: true,
                 fillColor: Colors.grey[100],

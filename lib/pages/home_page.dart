@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../shared/data/placeholder.dart';
 import 'home_view.dart';
+import 'create_event_sheet.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key, required this.title});
@@ -51,8 +52,12 @@ class _HomePageContent extends StatelessWidget {
   Widget _buildFloatingActionButton(BuildContext context) {
     return FloatingActionButton(
       onPressed: () {
-        // TODO: Navigate to create event page
-        debugPrint('Create event button pressed');
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => const CreateEventSheet(),
+        );
       },
       backgroundColor: Colors.white70,
       foregroundColor: Colors.grey[800],
@@ -103,12 +108,12 @@ class _HomePageContent extends StatelessWidget {
       elevation: 4,
       flexibleSpace: ClipRRect(
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 3.5, sigmaY: 3.5),
+          filter: ImageFilter.blur(sigmaX: 2.5, sigmaY: 2.5),
           child: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Colors.black.withValues(alpha: 0.4),
+                  Colors.black.withValues(alpha: 0.7),
                   Colors.transparent,
                 ],
                 begin: Alignment.topCenter,

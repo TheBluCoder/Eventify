@@ -15,7 +15,9 @@ void main() {
         dateTime: DateTime(2025, 11, 5, 15, 30), // Nov 5, 2025, 3:30 PM
         location: 'Test Location',
         distanceKm: 1.5,
-        attendeeCount: 50,
+        latitude: 45.4247,
+        longitude: -75.6950,
+        interestedCount: 50,
         tags: ['Test', 'Event'],
         mediaUrl: 'https://example.com/image.jpg',
       );
@@ -36,9 +38,9 @@ void main() {
         expect(testEvent.isSaved, false);
         expect(testEvent.isRSVP, false);
         expect(testEvent.isFollowingOrganizer, false);
-        expect(testEvent.likesCount, 0);
+        // likesCount has been removed from EventModel
         expect(testEvent.sharesCount, 0);
-        expect(testEvent.commentsCount, 0);
+        // commentsCount has been removed from EventModel
         expect(testEvent.isUserEvent, false);
       });
 
@@ -52,7 +54,9 @@ void main() {
           dateTime: DateTime(2025, 11, 6),
           location: 'Custom Location',
           distanceKm: 2.0,
-          attendeeCount: 100,
+          latitude: 45.4247,
+          longitude: -75.6950,
+          interestedCount: 100,
           tags: ['Custom'],
           mediaUrl: 'https://example.com/custom-video.mp4',
           isVideo: true,
@@ -60,9 +64,9 @@ void main() {
           isSaved: true,
           isRSVP: true,
           isFollowingOrganizer: true,
-          likesCount: 42,
+          // likesCount has been removed from EventModel
           sharesCount: 15,
-          commentsCount: 23,
+          // commentsCount has been removed from EventModel
           isUserEvent: true,
         );
 
@@ -71,9 +75,9 @@ void main() {
         expect(event.isSaved, true);
         expect(event.isRSVP, true);
         expect(event.isFollowingOrganizer, true);
-        expect(event.likesCount, 42);
+        // likesCount has been removed from EventModel
         expect(event.sharesCount, 15);
-        expect(event.commentsCount, 23);
+        // commentsCount has been removed from EventModel
         expect(event.isUserEvent, true);
       });
     });
@@ -90,7 +94,9 @@ void main() {
           dateTime: DateTime(now.year, now.month, now.day, 14, 30),
           location: 'Location',
           distanceKm: 1.0,
-          attendeeCount: 10,
+          latitude: 45.4247,
+          longitude: -75.6950,
+          interestedCount: 10,
           tags: ['Test'],
           mediaUrl: 'https://example.com/image.jpg',
         );
@@ -110,7 +116,9 @@ void main() {
           dateTime: DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 10, 15),
           location: 'Location',
           distanceKm: 1.0,
-          attendeeCount: 10,
+          latitude: 45.4247,
+          longitude: -75.6950,
+          interestedCount: 10,
           tags: ['Test'],
           mediaUrl: 'https://example.com/image.jpg',
         );
@@ -129,7 +137,9 @@ void main() {
           dateTime: DateTime(2025, 12, 25, 18, 45),
           location: 'Location',
           distanceKm: 1.0,
-          attendeeCount: 10,
+          latitude: 45.4247,
+          longitude: -75.6950,
+          interestedCount: 10,
           tags: ['Test'],
           mediaUrl: 'https://example.com/image.jpg',
         );
@@ -147,7 +157,9 @@ void main() {
           dateTime: DateTime(2025, 11, 10, 0, 0),
           location: 'Location',
           distanceKm: 1.0,
-          attendeeCount: 10,
+          latitude: 45.4247,
+          longitude: -75.6950,
+          interestedCount: 10,
           tags: ['Test'],
           mediaUrl: 'https://example.com/image.jpg',
         );
@@ -165,7 +177,9 @@ void main() {
           dateTime: DateTime(2025, 11, 10, 12, 0),
           location: 'Location',
           distanceKm: 1.0,
-          attendeeCount: 10,
+          latitude: 45.4247,
+          longitude: -75.6950,
+          interestedCount: 10,
           tags: ['Test'],
           mediaUrl: 'https://example.com/image.jpg',
         );
@@ -185,7 +199,9 @@ void main() {
           dateTime: DateTime(2025, 11, 10),
           location: 'Location',
           distanceKm: 0.5,
-          attendeeCount: 10,
+          latitude: 45.4247,
+          longitude: -75.6950,
+          interestedCount: 10,
           tags: ['Test'],
           mediaUrl: 'https://example.com/image.jpg',
         );
@@ -203,7 +219,9 @@ void main() {
           dateTime: DateTime(2025, 11, 10),
           location: 'Location',
           distanceKm: 1.0,
-          attendeeCount: 10,
+          latitude: 45.4247,
+          longitude: -75.6950,
+          interestedCount: 10,
           tags: ['Test'],
           mediaUrl: 'https://example.com/image.jpg',
         );
@@ -225,7 +243,9 @@ void main() {
           dateTime: DateTime(2025, 11, 10),
           location: 'Location',
           distanceKm: 0.123,
-          attendeeCount: 10,
+          latitude: 45.4247,
+          longitude: -75.6950,
+          interestedCount: 10,
           tags: ['Test'],
           mediaUrl: 'https://example.com/image.jpg',
         );
@@ -243,7 +263,9 @@ void main() {
           dateTime: DateTime(2025, 11, 10),
           location: 'Location',
           distanceKm: 15.7,
-          attendeeCount: 10,
+          latitude: 45.4247,
+          longitude: -75.6950,
+          interestedCount: 10,
           tags: ['Test'],
           mediaUrl: 'https://example.com/image.jpg',
         );
@@ -263,7 +285,9 @@ void main() {
           dateTime: DateTime(2025, 11, 10, 9, 5),
           location: 'Location',
           distanceKm: 1.0,
-          attendeeCount: 10,
+          latitude: 45.4247,
+          longitude: -75.6950,
+          interestedCount: 10,
           tags: ['Test'],
           mediaUrl: 'https://example.com/image.jpg',
         );
@@ -287,7 +311,9 @@ void main() {
             dateTime: DateTime(2025, month, 15, 12, 0),
             location: 'Location',
             distanceKm: 1.0,
-            attendeeCount: 10,
+            latitude: 45.4247,
+            longitude: -75.6950,
+            interestedCount: 10,
             tags: ['Test'],
             mediaUrl: 'https://example.com/image.jpg',
           );
@@ -307,7 +333,9 @@ void main() {
           dateTime: DateTime(2025, 11, 10),
           location: 'Location',
           distanceKm: 1.0,
-          attendeeCount: 10,
+          latitude: 45.4247,
+          longitude: -75.6950,
+          interestedCount: 10,
           tags: [],
           mediaUrl: 'https://example.com/image.jpg',
         );
@@ -325,12 +353,14 @@ void main() {
           dateTime: DateTime(2025, 11, 10),
           location: 'Location',
           distanceKm: 1.0,
-          attendeeCount: 0,
+          latitude: 45.4247,
+          longitude: -75.6950,
+          interestedCount: 0,
           tags: ['Test'],
           mediaUrl: 'https://example.com/image.jpg',
         );
 
-        expect(noAttendeesEvent.attendeeCount, 0);
+        expect(noAttendeesEvent.interestedCount, 0);
       });
 
       test('should handle very high social counts', () {
@@ -343,17 +373,19 @@ void main() {
           dateTime: DateTime(2025, 11, 10),
           location: 'Location',
           distanceKm: 1.0,
-          attendeeCount: 1000,
+          latitude: 45.4247,
+          longitude: -75.6950,
+          interestedCount: 1000,
           tags: ['Test'],
           mediaUrl: 'https://example.com/image.jpg',
-          likesCount: 9999,
+          // likesCount has been removed from EventModel
           sharesCount: 5555,
-          commentsCount: 3333,
+          // commentsCount has been removed from EventModel
         );
 
-        expect(popularEvent.likesCount, 9999);
+        // likesCount has been removed from EventModel
         expect(popularEvent.sharesCount, 5555);
-        expect(popularEvent.commentsCount, 3333);
+        // commentsCount has been removed from EventModel
       });
     });
   });
