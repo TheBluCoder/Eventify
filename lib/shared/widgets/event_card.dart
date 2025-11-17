@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../app/app_constants.dart';
 import '../../app/app_theme.dart';
 import '../models/event_model.dart';
+import '../../routes/app_routes.dart';
 import 'event_image_with_overlays.dart';
 import 'registration_button.dart';
+import 'event_options_menu.dart';
 
 /// Reusable event card widget
 class EventCard extends StatelessWidget {
   final EventModel event;
   final VoidCallback? onLikeTap;
-  final VoidCallback? onMoreTap;
+  final VoidCallback? onMoreTap; // Deprecated - use individual callbacks instead
   final VoidCallback? onRegistrationTap;
+  final VoidCallback? onAddToCalendar;
+  final VoidCallback? onFlag;
+  final VoidCallback? onShare;
+  final VoidCallback? onBoost;
   final bool showRegistrationButton;
   final bool showImage;
   final double? imageAspectRatio;
@@ -21,6 +28,10 @@ class EventCard extends StatelessWidget {
     this.onLikeTap,
     this.onMoreTap,
     this.onRegistrationTap,
+    this.onAddToCalendar,
+    this.onFlag,
+    this.onShare,
+    this.onBoost,
     this.showRegistrationButton = true,
     this.showImage = true,
     this.imageAspectRatio,
@@ -31,12 +42,16 @@ class EventCard extends StatelessWidget {
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: AppConstants.maxContentWidth),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border(bottom: BorderSide(color: AppTheme.grey300)),
-          ),
-          child: Padding(
+        child: GestureDetector(
+          onTap: () {
+            context.push(AppRouter.viewEvent, extra: event);
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(bottom: BorderSide(color: AppTheme.grey300)),
+            ),
+            child: Padding(
             padding: const EdgeInsets.only(
               left: AppConstants.paddingXS,
               right: AppConstants.spacingXL,
@@ -66,6 +81,36 @@ class EventCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Boosted indicator (if event was boosted by someone you follow)
+                      if (event.isBoosted && event.boosterUsername != null) ...[
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.rocket_launch,
+                              size: 12,
+                              color: AppTheme.grey600,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              event.boosterUsername!,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    fontSize: 11,
+                                    color: AppTheme.grey600,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'boosted',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    fontSize: 11,
+                                    color: AppTheme.grey600,
+                                  ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                      ],
                       // Organizer name
                       Row(
                         children: [
@@ -83,15 +128,13 @@ class EventCard extends StatelessWidget {
                               ],
                             ),
                           ),
-                          IconButton(
-                            onPressed: onMoreTap,
-                            icon: Icon(
-                              Icons.more_horiz,
-                              size: AppConstants.iconSizeXL,
-                              color: AppTheme.grey600,
-                            ),
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
+                          EventOptionsMenu(
+                            organizerUsername: event.organizerUsername,
+                            onAddToCalendar: onAddToCalendar,
+                            onFlag: onFlag,
+                            onShare: onShare,
+                            onFollow: null, // Follow is not handled in event_card
+                            showFollow: false,
                           ),
                         ],
                       ),
@@ -135,8 +178,16 @@ class EventCard extends StatelessWidget {
                               if (showRegistrationButton &&
                                   event.registrationUrl != null &&
                                   event.registrationUrl!.isNotEmpty)
-                                RegistrationButton(
-                                  onPressed: onRegistrationTap ?? () {},
+                                GestureDetector(
+                                  onTap: () {
+                                    onRegistrationTap?.call();
+                                  },
+                                  behavior: HitTestBehavior.opaque,
+                                  child: RegistrationButton(
+                                    onPressed: () {
+                                      // Empty - handled by parent GestureDetector
+                                    },
+                                  ),
                                 ),
                             ],
                           ),
@@ -200,38 +251,68 @@ class EventCard extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: AppConstants.spacingL),
-                      // Tags
-                      if (event.tags.isNotEmpty) ...[
-                        Wrap(
-                          spacing: AppConstants.spacingS,
-                          runSpacing: AppConstants.paddingS,
-                          children: event.tags
-                              .map(
-                                (tag) => Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: AppConstants.paddingM,
-                                    vertical: AppConstants.paddingS,
-                                  ),
-                                  decoration: AppTheme.tagDecoration,
-                                  child: Text(
-                                    tag,
-                                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                          fontSize: AppConstants.fontSizeM,
-                                          color: AppTheme.grey700,
-                                          fontWeight: FontWeight.w500,
+                      // Tags and Boost button
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Tags
+                          if (event.tags.isNotEmpty)
+                            Expanded(
+                              child: Wrap(
+                                spacing: AppConstants.spacingS,
+                                runSpacing: AppConstants.paddingS,
+                                children: event.tags
+                                    .map(
+                                      (tag) => Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: AppConstants.paddingM,
+                                          vertical: AppConstants.paddingS,
                                         ),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                        ),
-                      ],
+                                        decoration: AppTheme.tagDecoration(context),
+                                        child: Text(
+                                          tag,
+                                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                                fontSize: AppConstants.fontSizeM,
+                                                color: AppTheme.grey700,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
+                            )
+                          else
+                            const Spacer(),
+                          // Boost button
+                          const SizedBox(width: AppConstants.spacingS),
+                          GestureDetector(
+                            onTap: () {
+                              onBoost?.call();
+                            },
+                            behavior: HitTestBehavior.opaque,
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppTheme.grey200,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                Icons.rocket_launch,
+                                size: AppConstants.iconSizeM,
+                                color: AppTheme.grey700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
               ],
             ),
           ),
+        ),
         ),
       ),
     );

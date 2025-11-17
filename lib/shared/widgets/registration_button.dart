@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../app/app_constants.dart';
-import '../../app/app_theme.dart';
 
 /// Reusable registration button widget
 class RegistrationButton extends StatelessWidget {
@@ -20,18 +19,20 @@ class RegistrationButton extends StatelessWidget {
         size: AppConstants.iconSizeM,
       ),
       label: Text(
-        'Register',
+        'RSVP',
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
               fontSize: AppConstants.fontSizeM,
+              color: Colors.blue[600],
             ),
       ),
       style: OutlinedButton.styleFrom(
+        backgroundColor: Colors.white70,
         fixedSize: const Size(
           AppConstants.registrationButtonWidth,
           AppConstants.registrationButtonHeight,
         ),
-        foregroundColor: AppTheme.blue700,
-        side: BorderSide(color: AppTheme.blue700),
+        foregroundColor: Colors.blue[600],
+        side: BorderSide(color: Colors.blue[600]!),
         padding: const EdgeInsets.symmetric(
           horizontal: AppConstants.paddingM,
           vertical: AppConstants.paddingS,

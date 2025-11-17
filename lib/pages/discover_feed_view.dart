@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import '../controllers/discover_controller.dart';
@@ -11,7 +12,7 @@ import '../shared/widgets/divider_section_header.dart';
 import '../shared/widgets/distance_badge.dart';
 import '../shared/widgets/image_loading_widget.dart';
 import '../shared/widgets/shared_map_widget.dart';
-import 'events_list_page.dart';
+import '../routes/app_routes.dart';
 
 class DiscoverFeedView extends StatefulWidget {
   final DiscoverState discoverState;
@@ -39,6 +40,12 @@ class _DiscoverFeedViewState extends State<DiscoverFeedView> {
   final List<EventModel> _trendingEvents = PlaceholderData.trendingEvents;
 
   final List<String> _categories = PlaceholderData.discoverCategories;
+  
+  // Track liked events
+  final Set<String> _likedEventIds = <String>{};
+  
+  // Track boosted events
+  final Set<String> _boostedEventIds = <String>{};
 
   @override
   void initState() {
@@ -139,14 +146,12 @@ class _DiscoverFeedViewState extends State<DiscoverFeedView> {
                               DividerSectionHeader(
                                 title: 'Nearby',
                                 onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => EventsListPage(
-                                        title: 'Nearby Events',
-                                        events: _events,
-                                      ),
-                                    ),
+                                  context.push(
+                                    AppRouter.eventsList,
+                                    extra: {
+                                      'title': 'Nearby Events',
+                                      'events': _events,
+                                    },
                                   );
                                 },
                                 padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingS),
@@ -156,7 +161,12 @@ class _DiscoverFeedViewState extends State<DiscoverFeedView> {
                             // Regular Events
                             ..._events.map((event) => Padding(
                               padding: const EdgeInsets.only(bottom: 16),
-                              child: _buildEventCard(event),
+                              child: GestureDetector(
+                                onTap: () {
+                                  context.push(AppRouter.viewEvent, extra: event);
+                                },
+                                child: _buildEventCard(event),
+                              ),
                             )),
                             const SizedBox(height: 20),
                           ],
@@ -223,14 +233,12 @@ class _DiscoverFeedViewState extends State<DiscoverFeedView> {
         ),
         GestureDetector(
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => EventsListPage(
-                  title: 'Trending Events',
-                  events: _trendingEvents,
-                ),
-              ),
+            context.push(
+              AppRouter.eventsList,
+              extra: {
+                'title': 'Trending Events',
+                'events': _trendingEvents,
+              },
             );
           },
           child: Container(
@@ -434,7 +442,7 @@ class _DiscoverFeedViewState extends State<DiscoverFeedView> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(AppConstants.borderRadiusM),
         border: Border.all(color: AppTheme.grey300),
-        boxShadow: AppTheme.shadowSmall,
+        boxShadow: AppTheme.shadowSmall(context),
       ),
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -567,25 +575,96 @@ class _DiscoverFeedViewState extends State<DiscoverFeedView> {
                     ],
                   ),
                   const SizedBox(height: 6),
-                  // Tags
-                  Wrap(
-                    spacing: 4,
-                    runSpacing: 4,
-                    children: event.tags.take(2).map((tag) => Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        tag,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          fontSize: 10,
-                          color: Colors.grey[700],
-                          fontWeight: FontWeight.w500,
+                  // Tags and Action Buttons
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Tags
+                      Expanded(
+                        child: Wrap(
+                          spacing: 4,
+                          runSpacing: 4,
+                          children: event.tags.take(2).map((tag) => Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              tag,
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                fontSize: 10,
+                                color: Colors.grey[700],
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          )).toList(),
                         ),
                       ),
-                    )).toList(),
+                      // Like and Boost buttons
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Like button
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                if (_likedEventIds.contains(event.id)) {
+                                  _likedEventIds.remove(event.id);
+                                } else {
+                                  _likedEventIds.add(event.id);
+                                }
+                              });
+                            },
+                            behavior: HitTestBehavior.opaque,
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[200],
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                _likedEventIds.contains(event.id) || event.isLiked
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                size: 16,
+                                color: _likedEventIds.contains(event.id) || event.isLiked
+                                    ? Colors.red
+                                    : Colors.grey[700],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          // Boost button
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                if (_boostedEventIds.contains(event.id)) {
+                                  _boostedEventIds.remove(event.id);
+                                } else {
+                                  _boostedEventIds.add(event.id);
+                                }
+                              });
+                            },
+                            behavior: HitTestBehavior.opaque,
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[200],
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                Icons.rocket_launch,
+                                size: 16,
+                                color: _boostedEventIds.contains(event.id) || event.isBoosted
+                                    ? Colors.orange
+                                    : Colors.grey[700],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ],
               ),

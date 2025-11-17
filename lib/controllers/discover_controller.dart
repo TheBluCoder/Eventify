@@ -3,6 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../core/utils/marker_manager.dart';
 import '../core/utils/map_controller_wrapper.dart';
 import '../shared/data/placeholder.dart';
+import '../shared/models/event_model.dart';
 
 /// State class for DiscoverPage logic
 /// Handles map-specific functionality and view switching
@@ -232,6 +233,17 @@ class DiscoverState {
     baseCount = (baseCount * (_radiusKm / 10)).toInt().clamp(0, 999);
     
     _eventCount = baseCount;
+  }
+
+  /// Gets an event by ID from discover events
+  EventModel? getEventById(String eventId) {
+    try {
+      return PlaceholderData.discoverEvents.firstWhere(
+        (event) => event.id == eventId,
+      );
+    } catch (e) {
+      return null;
+    }
   }
 
   /// Disposes of resources

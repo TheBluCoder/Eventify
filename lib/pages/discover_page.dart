@@ -133,7 +133,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
           decoration: BoxDecoration(
             color: Colors.white30,
             borderRadius: BorderRadius.circular(20),
-            boxShadow: AppTheme.shadowMedium,
+            boxShadow: AppTheme.shadowMedium(context),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,

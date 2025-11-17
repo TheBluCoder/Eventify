@@ -20,10 +20,17 @@ class _CreateEventSheetState extends State<CreateEventSheet> {
 
   DateTime? _startTime;
   DateTime? _endTime;
+  DateTime? _expirationDate;
   File? _selectedMedia;
   bool _isVideo = false;
   bool _isRSVPEnabled = false;
+  bool _isRecurring = false;
   String _price = 'Free';
+  List<int> _selectedRecurringDays = []; // 1=Monday, 7=Sunday
+  DateTime? _recurringPeriodStart;
+  DateTime? _recurringPeriodEnd;
+  List<String> _selectedTags = []; // Maximum 3 tags
+  final TextEditingController _tagController = TextEditingController();
 
   final ImagePicker _imagePicker = ImagePicker();
 
@@ -36,6 +43,7 @@ class _CreateEventSheetState extends State<CreateEventSheet> {
     _gradientColors = _generateRandomGradient();
     _startTime = DateTime.now().add(const Duration(hours: 1));
     _endTime = _startTime?.add(const Duration(hours: 1));
+    _expirationDate = _startTime; // Default to start date
   }
 
   List<Color> _generateRandomGradient() {
@@ -103,6 +111,10 @@ class _CreateEventSheetState extends State<CreateEventSheet> {
           );
           if (_endTime != null && _endTime!.isBefore(_startTime!)) {
             _endTime = _startTime!.add(const Duration(hours: 1));
+          }
+          // Update expiration date to match start date if it was previously set to old start date
+          if (_expirationDate == null || _expirationDate!.isBefore(_startTime!)) {
+            _expirationDate = _startTime;
           }
         });
       }
@@ -183,8 +195,191 @@ class _CreateEventSheetState extends State<CreateEventSheet> {
     return '$displayHour:${minute.toString().padLeft(2, '0')} $period';
   }
 
+  Future<void> _selectExpirationDate() async {
+    if (_startTime == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select start time first')),
+      );
+      return;
+    }
+
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _expirationDate ?? _startTime!,
+      firstDate: _startTime!,
+      lastDate: DateTime.now().add(const Duration(days: 730)), // 2 years
+    );
+
+    if (!mounted) return;
+
+    if (picked != null) {
+      setState(() {
+        _expirationDate = DateTime(
+          picked.year,
+          picked.month,
+          picked.day,
+        );
+      });
+    }
+  }
+
+  Future<void> _selectRecurringPeriodStart() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _recurringPeriodStart ?? _startTime ?? DateTime.now(),
+      firstDate: _startTime ?? DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 730)),
+    );
+
+    if (!mounted) return;
+
+    if (picked != null) {
+      setState(() {
+        _recurringPeriodStart = DateTime(
+          picked.year,
+          picked.month,
+          picked.day,
+        );
+        // Ensure end date is after start date
+        if (_recurringPeriodEnd != null &&
+            _recurringPeriodEnd!.isBefore(_recurringPeriodStart!)) {
+          _recurringPeriodEnd = null;
+        }
+      });
+    }
+  }
+
+  Future<void> _selectRecurringPeriodEnd() async {
+    if (_recurringPeriodStart == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select recurring period start date first')),
+      );
+      return;
+    }
+
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _recurringPeriodEnd ?? _recurringPeriodStart!,
+      firstDate: _recurringPeriodStart!,
+      lastDate: DateTime.now().add(const Duration(days: 730)),
+    );
+
+    if (!mounted) return;
+
+    if (picked != null) {
+      if (picked.isBefore(_recurringPeriodStart!)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('End date must be after start date')),
+        );
+        return;
+      }
+
+      setState(() {
+        _recurringPeriodEnd = DateTime(
+          picked.year,
+          picked.month,
+          picked.day,
+        );
+      });
+    }
+  }
+
+  void _toggleRecurringDay(int day) {
+    setState(() {
+      if (_selectedRecurringDays.contains(day)) {
+        _selectedRecurringDays.remove(day);
+      } else {
+        _selectedRecurringDays.add(day);
+        _selectedRecurringDays.sort();
+      }
+    });
+  }
+
+  String _formatDateOnly(DateTime dateTime) {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return '${months[dateTime.month - 1]} ${dateTime.day}, ${dateTime.year}';
+  }
+
+  void _addTag(String tag) {
+    if (tag.trim().isEmpty) return;
+    final trimmedTag = tag.trim();
+    if (_selectedTags.length >= 3) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Maximum 3 tags allowed')),
+      );
+      return;
+    }
+    if (_selectedTags.contains(trimmedTag)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Tag already added')),
+      );
+      return;
+    }
+    setState(() {
+      _selectedTags.add(trimmedTag);
+      _tagController.clear();
+    });
+  }
+
+  void _removeTag(String tag) {
+    setState(() {
+      _selectedTags.remove(tag);
+    });
+  }
+
+  // Predefined popular tags
+  static const List<String> _popularTags = [
+    'Tech',
+    'Music',
+    'Art',
+    'Food',
+    'Sports',
+    'Networking',
+    'Education',
+    'Entertainment',
+    'Community',
+    'Business',
+    'Health',
+    'Fitness',
+    'Culture',
+    'Family',
+    'AI',
+    'Live',
+    'Career',
+    'Festival',
+  ];
+
   void _handleCreateEvent() {
+    // Validate recurring event data if enabled
+    if (_isRecurring) {
+      if (_selectedRecurringDays.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select at least one day for recurring event')),
+        );
+        return;
+      }
+      if (_recurringPeriodStart == null || _recurringPeriodEnd == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select recurring period start and end dates')),
+        );
+        return;
+      }
+    }
+
     // TODO: Implement event creation logic
+    // Include the following fields when creating the event:
+    // - expirationDate: _expirationDate
+    // - isRecurring: _isRecurring
+    // - recurringDays: _selectedRecurringDays (if recurring)
+    // - recurringPeriodStart: _recurringPeriodStart (if recurring)
+    // - recurringPeriodEnd: _recurringPeriodEnd (if recurring)
+    // - tags: _selectedTags (maximum 3 tags)
+    
     Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Event created successfully!')),
@@ -198,6 +393,7 @@ class _CreateEventSheetState extends State<CreateEventSheet> {
     _locationController.dispose();
     _rsvpUrlController.dispose();
     _capacityController.dispose();
+    _tagController.dispose();
     super.dispose();
   }
 
@@ -253,8 +449,25 @@ class _CreateEventSheetState extends State<CreateEventSheet> {
 
                       const SizedBox(height: 20),
 
-                      // Start/End Time
-                      _buildTimeSection(),
+                      // Start/End Time (hidden when recurring is enabled)
+                      if (!_isRecurring) ...[
+                        _buildTimeSection(),
+                        const SizedBox(height: 20),
+                      ],
+
+                      // Expiration Date
+                      _buildExpirationDateSection(),
+
+                      const SizedBox(height: 20),
+
+                      // Recurring Event Toggle
+                      _buildRecurringToggleSection(),
+
+                      // Recurring Event Details (shown when enabled)
+                      if (_isRecurring) ...[
+                        const SizedBox(height: 20),
+                        _buildRecurringDetailsSection(),
+                      ],
 
                       const SizedBox(height: 20),
 
@@ -275,6 +488,11 @@ class _CreateEventSheetState extends State<CreateEventSheet> {
 
                       // Options Section
                       _buildOptionsSection(),
+
+                      const SizedBox(height: 32),
+
+                      // Tags Section (last as it's the least relevant and longest)
+                      _buildTagsSection(),
 
                       const SizedBox(height: 40),
                     ],
@@ -424,9 +642,8 @@ class _CreateEventSheetState extends State<CreateEventSheet> {
         maxLength: 25,
         decoration: InputDecoration(
           hintText: 'Event Name',
-          hintStyle: TextTheme.of(context).bodyMedium?.copyWith(
-            color: Colors.white.withValues(alpha: 0.6),
-            fontWeight: FontWeight.w500,
+          hintStyle: TextTheme.of(context).bodyLarge?.copyWith(
+            color: Colors.white.withValues(alpha: 0.5),
           ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
@@ -744,6 +961,428 @@ class _CreateEventSheetState extends State<CreateEventSheet> {
             ],
           ),
         ),
+      ],
+    );
+  }
+
+  Widget _buildExpirationDateSection() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      child: GestureDetector(
+        onTap: _selectExpirationDate,
+        child: Row(
+          children: [
+            const Icon(Icons.event_busy_outlined, color: Colors.white70, size: 20),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Expiration Date',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ),
+            Text(
+              _expirationDate != null
+                  ? _formatDateOnly(_expirationDate!)
+                  : 'Select date',
+              style: TextStyle(
+                color: _expirationDate != null
+                    ? Colors.white
+                    : Colors.white60,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.chevron_right, color: Colors.white70, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecurringToggleSection() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      child: Row(
+        children: [
+          const Icon(Icons.repeat, color: Colors.white70, size: 20),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Text(
+              'Recurring Event',
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
+          ),
+          Switch(
+            value: _isRecurring,
+            onChanged: (value) {
+              setState(() {
+                _isRecurring = value;
+                if (value) {
+                  // Initialize recurring period dates if not set
+                  if (_recurringPeriodStart == null && _startTime != null) {
+                    _recurringPeriodStart = DateTime(
+                      _startTime!.year,
+                      _startTime!.month,
+                      _startTime!.day,
+                    );
+                  }
+                  if (_recurringPeriodEnd == null && _startTime != null) {
+                    // Default to 3 months from start date
+                    _recurringPeriodEnd = DateTime(
+                      _startTime!.year,
+                      _startTime!.month,
+                      _startTime!.day,
+                    ).add(const Duration(days: 90));
+                  }
+                } else {
+                  // Clear recurring data when disabled
+                  _selectedRecurringDays.clear();
+                  _recurringPeriodStart = null;
+                  _recurringPeriodEnd = null;
+                }
+              });
+            },
+            activeThumbColor: Colors.white,
+            activeTrackColor: Colors.white.withValues(alpha: 0.5),
+            inactiveThumbColor: Colors.white,
+            inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecurringDetailsSection() {
+    const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Recurring Details',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 16),
+          
+          // Day selector
+          const Text(
+            'Days of Week',
+            style: TextStyle(color: Colors.white70, fontSize: 14),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: List.generate(7, (index) {
+              final day = index + 1; // 1=Monday, 7=Sunday
+              final isSelected = _selectedRecurringDays.contains(day);
+              return GestureDetector(
+                onTap: () => _toggleRecurringDay(day),
+                child: Container(
+                  width: 45,
+                  height: 45,
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? Colors.white.withValues(alpha: 0.3)
+                        : Colors.white.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isSelected
+                          ? Colors.white
+                          : Colors.white.withValues(alpha: 0.3),
+                      width: isSelected ? 2 : 1,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      daysOfWeek[index],
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ),
+          
+          const SizedBox(height: 20),
+          
+          // Recurring period start
+          GestureDetector(
+            onTap: _selectRecurringPeriodStart,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.calendar_today, color: Colors.white70, size: 18),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      'Period Start',
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                    ),
+                  ),
+                  Text(
+                    _recurringPeriodStart != null
+                        ? _formatDateOnly(_recurringPeriodStart!)
+                        : 'Select date',
+                    style: TextStyle(
+                      color: _recurringPeriodStart != null
+                          ? Colors.white
+                          : Colors.white60,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          const SizedBox(height: 12),
+          
+          // Recurring period end
+          GestureDetector(
+            onTap: _selectRecurringPeriodEnd,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.event_available, color: Colors.white70, size: 18),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      'Period End',
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                    ),
+                  ),
+                  Text(
+                    _recurringPeriodEnd != null
+                        ? _formatDateOnly(_recurringPeriodEnd!)
+                        : 'Select date',
+                    style: TextStyle(
+                      color: _recurringPeriodEnd != null
+                          ? Colors.white
+                          : Colors.white60,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTagsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Text(
+              'Tags',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '${_selectedTags.length}/3',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        
+        // Selected tags
+        if (_selectedTags.isNotEmpty) ...[
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _selectedTags.map((tag) {
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.25),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.5),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      tag,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    GestureDetector(
+                      onTap: () => _removeTag(tag),
+                      child: Icon(
+                        Icons.close,
+                        size: 16,
+                        color: Colors.white.withValues(alpha: 0.8),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 12),
+        ],
+        
+        // Add tag input
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: TextField(
+                  controller: _tagController,
+                  style: const TextStyle(color: Colors.white, fontSize: 16),
+                  decoration: InputDecoration(
+                    hintText: _selectedTags.length >= 3 
+                        ? 'Maximum 3 tags reached'
+                        : 'Add a tag',
+                    hintStyle: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.6),
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.tag,
+                      color: Colors.white70,
+                      size: 20,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                  ),
+                  enabled: _selectedTags.length < 3,
+                  onSubmitted: (value) {
+                    if (_selectedTags.length < 3) {
+                      _addTag(value);
+                    }
+                  },
+                ),
+              ),
+            ),
+            if (_selectedTags.length < 3) ...[
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () {
+                  if (_tagController.text.trim().isNotEmpty) {
+                    _addTag(_tagController.text);
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.25),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.add,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+        
+        const SizedBox(height: 12),
+        
+        // Popular tags suggestions
+        if (_selectedTags.length < 3) ...[
+          const Text(
+            'Popular tags',
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _popularTags
+                .where((tag) => !_selectedTags.contains(tag))
+                .take(12)
+                .map((tag) {
+              return GestureDetector(
+                onTap: () => _addTag(tag),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    tag,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
       ],
     );
   }

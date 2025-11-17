@@ -1,7 +1,7 @@
 import 'controllers/location_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'pages/main_navigation_page.dart';
+import 'routes/app_routes.dart';
 // import 'providers/app_providers.dart';
 
 void main() {
@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'Echoes ',
       theme: ThemeData.from(
@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
           // foregroundColor: Colors.white,
         ),
       ),
-      home: const MainNavigationPage(),
+      routerConfig: AppRouter.router,
     );
   }
 }

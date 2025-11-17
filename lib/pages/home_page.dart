@@ -1,8 +1,10 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../shared/data/placeholder.dart';
 import 'home_view.dart';
 import 'create_event_sheet.dart';
+import '../routes/app_routes.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key, required this.title});
@@ -61,7 +63,7 @@ class _HomePageContent extends StatelessWidget {
       },
       backgroundColor: Colors.white70,
       foregroundColor: Colors.grey[800],
-      elevation: 10,
+      elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: const Icon(Icons.add_outlined, size: 28),
     );
@@ -125,20 +127,25 @@ class _HomePageContent extends StatelessWidget {
       ),
       leading: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black,
-                blurRadius: 4,
-                offset: const Offset(2, 2),
+        child: GestureDetector(
+          onTap: () {
+            context.push(AppRouter.settings);
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black,
+                  blurRadius: 4,
+                  offset: const Offset(2, 2),
+                ),
+              ],
+            ),
+            child: CircleAvatar(
+              foregroundImage: NetworkImage(
+                "https://cdn.dribbble.com/userupload/16394495/file/original-44f9e9320643c7c6d3f4203f161a987e.webp?resize=1024x1024&vertical=center",
               ),
-            ],
-          ),
-          child: CircleAvatar(
-            foregroundImage: NetworkImage(
-              "https://cdn.dribbble.com/userupload/16394495/file/original-44f9e9320643c7c6d3f4203f161a987e.webp?resize=1024x1024&vertical=center",
             ),
           ),
         ),

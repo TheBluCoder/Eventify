@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/location_controller.dart';
 import '../../controllers/discover_controller.dart';
 import '../../app/app_constants.dart';
 import '../../app/app_theme.dart';
+import '../../routes/app_routes.dart';
 
 /// Shared map widget used by both DiscoverFeedView and MapViewPage
 /// Ensures both views stay in sync with the same markers, styling, and behavior
@@ -28,23 +30,36 @@ class SharedMapWidget extends StatefulWidget {
 }
 
 class _SharedMapWidgetState extends State<SharedMapWidget> {
-  // Cache the map style future so it only loads once
-  static Future<String>? _mapStyleFuture;
-  
+  // Cache map style futures for both light and dark themes
+  static Future<String>? _lightMapStyleFuture;
+  static Future<String>? _darkMapStyleFuture;
+
   // Track marker IDs to detect changes
   Set<String> _previousMarkerIds = {};
 
-  // Load map style asynchronously (cached)
-  static Future<String> _loadMapStyle() {
-    _mapStyleFuture ??= () async {
-      try {
-        return await rootBundle.loadString('assets/map_style.json');
-      } catch (e) {
-        debugPrint('Error loading map style: $e');
-        return '';
-      }
-    }();
-    return _mapStyleFuture!;
+  // Load map style asynchronously based on theme
+  Future<String> _loadMapStyle(bool isDarkMode) {
+    if (isDarkMode) {
+      _darkMapStyleFuture ??= () async {
+        try {
+          return await rootBundle.loadString('assets/dark_map_style.json');
+        } catch (e) {
+          debugPrint('Error loading dark map style: $e');
+          return '';
+        }
+      }();
+      return _darkMapStyleFuture!;
+    } else {
+      _lightMapStyleFuture ??= () async {
+        try {
+          return await rootBundle.loadString('assets/map_style.json');
+        } catch (e) {
+          debugPrint('Error loading light map style: $e');
+          return '';
+        }
+      }();
+      return _lightMapStyleFuture!;
+    }
   }
 
   @override
@@ -80,23 +95,25 @@ class _SharedMapWidgetState extends State<SharedMapWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Selector<LocationController, LatLng?>(
       selector: (_, locationController) => locationController.userLocationCoords,
       builder: (context, location, child) {
         if (location == null) {
           return Container(
-            color: Colors.grey[200],
+            color: isDarkMode ? AppTheme.darkBackground : Colors.grey[200],
             child: const Center(
               child: CircularProgressIndicator(),
             ),
           );
         }
-        
+
         // Use current markers from shared state (always in sync)
         final currentMarkers = widget.discoverState.markers;
-        
+
         return FutureBuilder<String>(
-          future: _loadMapStyle(),
+          future: _loadMapStyle(isDarkMode),
           builder: (context, snapshot) {
             return Stack(
               children: [
@@ -112,7 +129,7 @@ class _SharedMapWidgetState extends State<SharedMapWidget> {
                   zoomControlsEnabled: false,
                   mapToolbarEnabled: false,
                   mapType: MapType.normal,
-                  markers: currentMarkers,
+                  markers: _buildMarkersWithTapHandlers(context, currentMarkers),
                   style: snapshot.data,
                 ),
                 if (widget.showControls)
@@ -123,6 +140,29 @@ class _SharedMapWidgetState extends State<SharedMapWidget> {
         );
       },
     );
+  }
+
+  Set<Marker> _buildMarkersWithTapHandlers(BuildContext context, Set<Marker> markers) {
+    return markers.map((marker) {
+      final markerId = marker.markerId.value;
+      // Only add tap handler for event markers
+      if (markerId.startsWith('event_')) {
+        return Marker(
+          markerId: marker.markerId,
+          position: marker.position,
+          icon: marker.icon,
+          infoWindow: marker.infoWindow,
+          onTap: () {
+            final eventId = markerId.substring(6); // Remove 'event_' prefix
+            final event = widget.discoverState.getEventById(eventId);
+            if (event != null) {
+              context.push(AppRouter.viewEvent, extra: event);
+            }
+          },
+        );
+      }
+      return marker;
+    }).toSet();
   }
 
   Widget _buildMapControls(BuildContext context, LatLng userLocation) {
@@ -139,9 +179,11 @@ class _SharedMapWidgetState extends State<SharedMapWidget> {
             vertical: AppConstants.spacingL,
           ),
           decoration: BoxDecoration(
-            color: Colors.white70,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? AppTheme.darkSurface.withValues(alpha: 0.9)
+                : Colors.white70,
             borderRadius: BorderRadius.circular(AppConstants.borderRadiusXL),
-            boxShadow: AppTheme.shadowMedium,
+            boxShadow: AppTheme.shadowMedium(context),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -156,12 +198,12 @@ class _SharedMapWidgetState extends State<SharedMapWidget> {
                   }
                 },
                 child: Icon(
-                  widget.discoverState.pinLocation != null 
-                    ? Icons.location_on 
+                  widget.discoverState.pinLocation != null
+                    ? Icons.location_on
                     : Icons.location_on_outlined,
                   color: widget.discoverState.pinLocation != null
                     ? AppTheme.red600
-                    : const Color.fromARGB(255, 15, 15, 15),
+                    : AppTheme.iconColor(context),
                   size: AppConstants.iconSizeXXL + 5,
                 ),
               ),
@@ -170,9 +212,9 @@ class _SharedMapWidgetState extends State<SharedMapWidget> {
                 onTap: () {
                   widget.discoverState.onRecenterPressed(userLocation);
                 },
-                child: const Icon(
+                child: Icon(
                   Icons.my_location_outlined,
-                  color: Color.fromARGB(255, 15, 15, 15),
+                  color: AppTheme.iconColor(context),
                   size: 20,
                 ),
               ),

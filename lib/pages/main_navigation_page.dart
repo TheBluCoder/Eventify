@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'home_page.dart';
 import 'discover_page.dart';
+import 'notifications_page.dart';
 
 class MainNavigationPage extends StatefulWidget {
   const MainNavigationPage({super.key});
@@ -16,7 +17,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   final List<Widget> _pages = [
     const HomePage(title: 'Echoes'),
     const DiscoverPage(),
-    const Placeholder(), // Notifications page - TODO: implement
+    const NotificationsPage(),
   ];
 
   @override

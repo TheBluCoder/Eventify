@@ -79,7 +79,7 @@ class AppConstants {
   static const double mapHeightPercentage = 0.4;
   static const double sheetInitialSize = 0.6;
   static const double sheetMinSize = 0.6;
-  static const double sheetMaxSize = 0.98;
+  static const double sheetMaxSize = 1.0;
   
   // Card Width Constraints
   static const double cardWidthMin = 200.0;
@@ -89,7 +89,7 @@ class AppConstants {
   
   // Badge Constraints
   static const double badgeMaxWidth = 120.0;
-  static const double registrationButtonWidth = 130.0;
+  static const double registrationButtonWidth = 80.0;
   static const double registrationButtonHeight = 28.0;
   
   // Opacity Values

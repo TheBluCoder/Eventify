@@ -69,7 +69,10 @@ class EventImageWithOverlays extends StatelessWidget {
             top: AppConstants.spacingL,
             left: AppConstants.spacingL,
             child: GestureDetector(
-              onTap: onLikeTap,
+              onTap: () {
+                onLikeTap?.call();
+              },
+              behavior: HitTestBehavior.opaque,
               child: Container(
                 padding: const EdgeInsets.all(AppConstants.paddingM),
                 decoration: AppTheme.badgeDecoration(

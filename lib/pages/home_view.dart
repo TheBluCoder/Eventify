@@ -28,16 +28,25 @@ class _HomeState extends State<Home> {
   // For You feed - personalized recommendations
   final List<EventModel> _forYouEvents = PlaceholderData.forYouEvents;
 
-  // Upcoming events for horizontal scroll - shows events the user liked (is interested in)
+  // Track events added to calendar (by event ID)
+  final Set<String> _eventsAddedToCalendar = <String>{};
+
+  // Upcoming events for horizontal scroll - shows events the user is interested in or created
+  // NOTE: We are NOT using isLiked to filter upcoming events. Instead, we use:
+  // - Events added to calendar via "Add to Calendar" in dropdown menu (tracked in _eventsAddedToCalendar)
+  // - isUserEvent (events the user created)
+  // The "Add to Calendar" action in the event card dropdown will add events to this upcoming section.
   List<EventModel> get _upcomingEvents {
     // Include both following and forYou events for upcoming section
     final allEvents = [..._followingEvents, ..._forYouEvents];
-    // Filter for upcoming events that the user has liked
-    final likedUpcoming = allEvents
-        .where((e) => e.isLiked && e.dateTime.isAfter(DateTime.now()))
+    // Filter for upcoming events that the user has added to calendar OR events they created
+    final upcoming = allEvents
+        .where((e) => 
+            (_eventsAddedToCalendar.contains(e.id) || e.isUserEvent) && 
+            e.dateTime.isAfter(DateTime.now()))
         .toList();
-    likedUpcoming.sort((a, b) => a.dateTime.compareTo(b.dateTime));
-    return likedUpcoming.take(10).toList();
+    upcoming.sort((a, b) => a.dateTime.compareTo(b.dateTime));
+    return upcoming.take(10).toList();
   }
 
   // Next upcoming event (first one for banner)
@@ -69,6 +78,48 @@ class _HomeState extends State<Home> {
     }
   }
 
+  void _handleAddToCalendar(EventModel event) {
+    setState(() {
+      _eventsAddedToCalendar.add(event.id);
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${event.title} added to your upcoming events'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _handleFlag(EventModel event) {
+    // TODO: Implement flag/report functionality
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Flagged: ${event.title}'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _handleShare(EventModel event) {
+    // TODO: Implement share functionality
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Sharing: ${event.title}'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _handleBoost(EventModel event) {
+    // TODO: Implement boost functionality
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Boosted: ${event.title}'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
   List<EventModel> get _currentFeedEvents {
     // Always return following events for now
     return _followingEvents;
@@ -89,7 +140,7 @@ class _HomeState extends State<Home> {
           },
           child: SingleChildScrollView(
             padding: EdgeInsets.only(
-              top: kToolbarHeight+38,
+              top: kToolbarHeight + AppConstants.spacingXL,
               bottom: kBottomNavigationBarHeight,
             ),
             controller: _scrollController,
@@ -129,13 +180,15 @@ class _HomeState extends State<Home> {
   }
 
   Widget _buildNextUpcomingBanner(EventModel event) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppConstants.spacingXL),
-      height: AppConstants.bannerHeight,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppConstants.borderRadiusL),
-        boxShadow: AppTheme.shadowLarge,
-      ),
+    return Builder(
+      builder: (context) {
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: AppConstants.spacingXL),
+          height: AppConstants.bannerHeight,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppConstants.borderRadiusL),
+            boxShadow: AppTheme.shadowLarge(context),
+          ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppConstants.borderRadiusL),
         child: Stack(
@@ -185,27 +238,66 @@ class _HomeState extends State<Home> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppConstants.spacingL,
-                        vertical: AppConstants.paddingS,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: AppConstants.opacityLight),
-                        borderRadius: BorderRadius.circular(AppConstants.borderRadiusL),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.3),
+                    // Badges
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppConstants.spacingL,
+                            vertical: AppConstants.paddingS,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: AppConstants.opacityLight),
+                            borderRadius: BorderRadius.circular(AppConstants.borderRadiusL),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Text(
+                            'Next Event',
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: AppConstants.fontSizeM,
+                            ),
+                          ),
                         ),
-                      ),
-                      child: Text(
-                        'Next Event',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: AppConstants.fontSizeM,
-                        ),
-                      ),
+                        if (event.isUserEvent) ...[
+                          const SizedBox(width: AppConstants.spacingM),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppConstants.spacingL,
+                              vertical: AppConstants.paddingS,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.withValues(alpha: AppConstants.opacityLight),
+                              borderRadius: BorderRadius.circular(AppConstants.borderRadiusL),
+                              border: Border.all(
+                                color: Colors.blue.withValues(alpha: 0.5),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.event,
+                                  size: AppConstants.iconSizeS,
+                                  color: Colors.white,
+                                ),
+                                const SizedBox(width: AppConstants.paddingXS),
+                                Text(
+                                  'Hosting',
+                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: AppConstants.fontSizeM,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     const SizedBox(height: AppConstants.spacingL),
                     // Title
@@ -260,6 +352,8 @@ class _HomeState extends State<Home> {
           ],
         ),
       ),
+        );
+      },
     );
   }
 
@@ -326,15 +420,17 @@ class _HomeState extends State<Home> {
     final bodyFontSize = (cardWidth * 0.033).clamp(9.0, 11.0);
     final iconSize = (cardWidth * 0.04).clamp(9.0, 11.0);
 
-    return Container(
-      width: cardWidth,
-      margin: const EdgeInsets.only(right: AppConstants.spacingL),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(AppConstants.borderRadiusM),
-        border: Border.all(color: AppTheme.grey300),
-        boxShadow: AppTheme.shadowSmall,
-      ),
+    return Builder(
+      builder: (context) {
+        return Container(
+          width: cardWidth,
+          margin: const EdgeInsets.only(right: AppConstants.spacingL),
+          decoration: BoxDecoration(
+            color: Colors.grey[200],
+            borderRadius: BorderRadius.circular(AppConstants.borderRadiusM),
+            border: Border.all(color: AppTheme.grey300),
+            boxShadow: AppTheme.shadowSmall(context),
+          ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppConstants.borderRadiusM),
         child: SizedBox(
@@ -362,10 +458,46 @@ class _HomeState extends State<Home> {
                   left: AppConstants.paddingS,
                   child: const VideoBadge(),
                 ),
+              // Hosting badge (if user created event)
+              if (event.isUserEvent)
+                Positioned(
+                  top: AppConstants.paddingS,
+                  left: event.isVideo ? 50 : AppConstants.paddingS,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppConstants.spacingS,
+                      vertical: AppConstants.paddingXS,
+                    ),
+                    decoration: AppTheme.badgeDecoration(
+                      color: Colors.blue,
+                      borderRadius: AppConstants.borderRadiusXS,
+                      opacity: AppConstants.opacityHeavy,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.event,
+                          size: AppConstants.iconSizeXS,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: AppConstants.paddingXS),
+                        Text(
+                          'Hosting',
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: Colors.white,
+                            fontSize: AppConstants.fontSizeXS,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               // Attendee count overlay at top left
               Positioned(
                 top: AppConstants.paddingS,
-                left: event.isVideo ? 50 : AppConstants.paddingS,
+                left: _getAttendeeBadgeLeftPosition(event),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppConstants.spacingS,
@@ -481,6 +613,8 @@ class _HomeState extends State<Home> {
           ),
         ),
       ),
+        );
+      },
     );
   }
 
@@ -510,6 +644,18 @@ class _HomeState extends State<Home> {
       ];
       return '${months[dateTime.month - 1]} ${dateTime.day}';
     }
+  }
+
+  double _getAttendeeBadgeLeftPosition(EventModel event) {
+    double left = AppConstants.paddingS;
+    if (event.isVideo) {
+      left = 50; // Position after video badge
+    }
+    if (event.isUserEvent) {
+      // Position after hosting badge (approximately 80px wide)
+      left = event.isVideo ? 130 : 80;
+    }
+    return left;
   }
 
   // COMMENTED OUT - Sticky feed tabs functionality
@@ -571,24 +717,33 @@ class _HomeState extends State<Home> {
       return const EmptyStateWidget(message: 'No events yet');
     }
 
+    final hasUpcomingEvents = _upcomingEvents.isNotEmpty;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        DividerSectionHeader(
-          title: 'Because you follow',
-          // title: _selectedFeedTab == AppConstants.feedTabForYou
-          //               ? 'Recommended for you'
-          //               : 'Because you follow',
-        ),
-        const SizedBox(height: AppConstants.paddingM),
+        // Only show "Because you follow" header when there are upcoming events
+        if (hasUpcomingEvents) ...[
+          DividerSectionHeader(
+            title: 'Because you follow',
+            // title: _selectedFeedTab == AppConstants.feedTabForYou
+            //               ? 'Recommended for you'
+            //               : 'Because you follow',
+          ),
+          const SizedBox(height: AppConstants.paddingM),
+        ],
         ...events.map(
           (event) => EventCard(
             event: event,
             onRegistrationTap: () => _launchRegistrationUrl(
               event.registrationUrl ?? '',
-              ),
             ),
+            onAddToCalendar: () => _handleAddToCalendar(event),
+            onFlag: () => _handleFlag(event),
+            onShare: () => _handleShare(event),
+            onBoost: () => _handleBoost(event),
           ),
+        ),
       ],
     );
   }

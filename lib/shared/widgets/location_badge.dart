@@ -28,6 +28,7 @@ class LocationBadge extends StatelessWidget {
             vertical: AppConstants.paddingS,
           ),
       decoration: AppTheme.badgeDecorationWithShadow(
+        context,
         color: Colors.black,
         borderRadius: borderRadius ?? AppConstants.borderRadiusM,
       ),

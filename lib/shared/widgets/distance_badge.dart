@@ -26,6 +26,7 @@ class DistanceBadge extends StatelessWidget {
             vertical: AppConstants.paddingS,
           ),
       decoration: AppTheme.badgeDecorationWithShadow(
+        context,
         color: Colors.black.withValues(alpha: 0.6),
         borderRadius: borderRadius ?? AppConstants.borderRadiusM,
       ),
