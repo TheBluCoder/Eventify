@@ -1,5 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../shared/models/notification_model.dart';
+import '../shared/data/placeholder.dart';
+import '../shared/utils/date_time_formatter.dart';
 
 class NotificationsPage extends StatelessWidget {
   const NotificationsPage({super.key});
@@ -24,7 +27,7 @@ class NotificationsPage extends StatelessWidget {
           },
           child: CircleAvatar(
             foregroundImage: NetworkImage(
-              "https://cdn.dribbble.com/userupload/16394495/file/original-44f9e9320643c7c6d3f4203f161a987e.webp?resize=1024x1024&vertical=center",
+              PlaceholderData.currentUserAvatar,
             ),
             radius: 18,
           ),
@@ -98,7 +101,7 @@ class NotificationsPage extends StatelessWidget {
   }
 
   Widget _buildNotificationsList(BuildContext context) {
-    final notifications = _getPlaceholderNotifications();
+    final notifications = PlaceholderData.placeholderNotifications;
 
     if (notifications.isEmpty) {
       return Center(
@@ -355,194 +358,8 @@ class NotificationsPage extends StatelessWidget {
   }
 
   String _formatTime(DateTime timestamp) {
-    final now = DateTime.now();
-    final difference = now.difference(timestamp);
-
-    if (difference.inDays > 7) {
-      return '${timestamp.day}/${timestamp.month}/${timestamp.year}';
-    } else if (difference.inDays > 0) {
-      return '${difference.inDays}d ago';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}h ago';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m ago';
-    } else {
-      return 'Just now';
-    }
+    return DateTimeFormatter.formatRelativeTime(timestamp);
   }
 
-  List<NotificationItem> _getPlaceholderNotifications() {
-    final now = DateTime.now();
-    return [
-      NotificationItem(
-        id: '1',
-        title: 'Event Reminder',
-        message: 'Tech Meetup Lagos starts in 2 hours at Victoria Island',
-        type: NotificationType.eventReminder,
-        timestamp: now.subtract(const Duration(minutes: 15)),
-        isRead: false,
-        userName: 'Echoes',
-        userAvatarUrl: 'https://cdn.dribbble.com/userupload/16394495/file/original-44f9e9320643c7c6d3f4203f161a987e.webp?resize=1024x1024&vertical=center',
-        previewImageUrl: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=400',
-      ),
-      NotificationItem(
-        id: '2',
-        title: 'New Follower',
-        message: 'Sarah Johnson started following you',
-        type: NotificationType.newFollower,
-        timestamp: now.subtract(const Duration(hours: 1)),
-        isRead: false,
-        userName: 'sarah_johnson',
-        userAvatarUrl: 'https://i.pravatar.cc/150?img=47',
-      ),
-      NotificationItem(
-        id: '3',
-        title: 'Event Updated',
-        message: 'Music Festival 2024 has been rescheduled to next week',
-        type: NotificationType.eventUpdate,
-        timestamp: now.subtract(const Duration(hours: 3)),
-        isRead: true,
-        userName: 'Echoes',
-        userAvatarUrl: 'https://cdn.dribbble.com/userupload/16394495/file/original-44f9e9320643c7c6d3f4203f161a987e.webp?resize=1024x1024&vertical=center',
-        previewImageUrl: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=400',
-      ),
-      NotificationItem(
-        id: '4',
-        title: 'New Comment',
-        message: 'Mike commented on your event: "Looking forward to this!"',
-        type: NotificationType.comment,
-        timestamp: now.subtract(const Duration(hours: 5)),
-        isRead: false,
-        userName: 'mike_taylor',
-        userAvatarUrl: 'https://i.pravatar.cc/150?img=12',
-        previewImageUrl: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=400',
-      ),
-      NotificationItem(
-        id: '5',
-        title: 'Event Reminder',
-        message: 'Art Exhibition Opening is tomorrow at 6:00 PM',
-        type: NotificationType.eventReminder,
-        timestamp: now.subtract(const Duration(hours: 8)),
-        isRead: true,
-        userName: 'Echoes',
-        userAvatarUrl: 'https://cdn.dribbble.com/userupload/16394495/file/original-44f9e9320643c7c6d3f4203f161a987e.webp?resize=1024x1024&vertical=center',
-        previewImageUrl: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400',
-      ),
-      NotificationItem(
-        id: '6',
-        title: 'New Like',
-        message: 'Emma and 5 others liked your event "Food & Wine Tasting"',
-        type: NotificationType.like,
-        timestamp: now.subtract(const Duration(days: 1)),
-        isRead: true,
-        userName: 'emma_wilson',
-        userAvatarUrl: 'https://i.pravatar.cc/150?img=33',
-        otherUsersCount: 5,
-        previewImageUrl: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400',
-      ),
-      NotificationItem(
-        id: '7',
-        title: 'New Follower',
-        message: 'David Williams started following you',
-        type: NotificationType.newFollower,
-        timestamp: now.subtract(const Duration(days: 1, hours: 5)),
-        isRead: true,
-        userName: 'david_williams',
-        userAvatarUrl: 'https://i.pravatar.cc/150?img=51',
-      ),
-      NotificationItem(
-        id: '8',
-        title: 'Event Reminder',
-        message: 'Yoga Session starts in 30 minutes at Central Park',
-        type: NotificationType.eventReminder,
-        timestamp: now.subtract(const Duration(days: 2)),
-        isRead: true,
-        userName: 'Echoes',
-        userAvatarUrl: 'https://cdn.dribbble.com/userupload/16394495/file/original-44f9e9320643c7c6d3f4203f161a987e.webp?resize=1024x1024&vertical=center',
-        previewImageUrl: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400',
-      ),
-      NotificationItem(
-        id: '9',
-        title: 'New Comment',
-        message: 'Lisa replied to your comment on "Startup Networking Event"',
-        type: NotificationType.comment,
-        timestamp: now.subtract(const Duration(days: 2, hours: 3)),
-        isRead: true,
-        userName: 'lisa_anderson',
-        userAvatarUrl: 'https://i.pravatar.cc/150?img=45',
-        previewImageUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=400',
-      ),
-      NotificationItem(
-        id: '10',
-        title: 'Event Updated',
-        message: 'Workshop location changed to Main Hall, Building A',
-        type: NotificationType.eventUpdate,
-        timestamp: now.subtract(const Duration(days: 3)),
-        isRead: true,
-        userName: 'Echoes',
-        userAvatarUrl: 'https://cdn.dribbble.com/userupload/16394495/file/original-44f9e9320643c7c6d3f4203f161a987e.webp?resize=1024x1024&vertical=center',
-        previewImageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400',
-      ),
-      NotificationItem(
-        id: '11',
-        title: 'New Like',
-        message: 'John liked your event "Photography Walk"',
-        type: NotificationType.like,
-        timestamp: now.subtract(const Duration(days: 4)),
-        isRead: true,
-        userName: 'john_smith',
-        userAvatarUrl: 'https://i.pravatar.cc/150?img=15',
-        previewImageUrl: 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400',
-      ),
-      NotificationItem(
-        id: '12',
-        title: 'Event Reminder',
-        message: 'Book Club Meeting is this Saturday at 2:00 PM',
-        type: NotificationType.eventReminder,
-        timestamp: now.subtract(const Duration(days: 5)),
-        isRead: true,
-        userName: 'Echoes',
-        userAvatarUrl: 'https://cdn.dribbble.com/userupload/16394495/file/original-44f9e9320643c7c6d3f4203f161a987e.webp?resize=1024x1024&vertical=center',
-        previewImageUrl: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400',
-      ),
-    ];
-  }
-}
-
-// Placeholder classes for notifications
-// TODO: Replace with actual data models
-enum NotificationType {
-  eventReminder,
-  newFollower,
-  eventUpdate,
-  comment,
-  like,
-  other,
-}
-
-class NotificationItem {
-  final String id;
-  final String title;
-  final String message;
-  final NotificationType type;
-  final DateTime timestamp;
-  final bool isRead;
-  final String userName;
-  final String? userAvatarUrl;
-  final String? previewImageUrl;
-  final int? otherUsersCount;
-
-  NotificationItem({
-    required this.id,
-    required this.title,
-    required this.message,
-    required this.type,
-    required this.timestamp,
-    this.isRead = false,
-    required this.userName,
-    this.userAvatarUrl,
-    this.previewImageUrl,
-    this.otherUsersCount,
-  });
 }
 

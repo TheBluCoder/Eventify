@@ -6,6 +6,7 @@ import '../controllers/location_controller.dart';
 import '../controllers/discover_controller.dart';
 import '../app/app_constants.dart';
 import '../app/app_theme.dart';
+import '../shared/data/placeholder.dart';
 import 'discover_map_view_page.dart';
 import 'discover_feed_view.dart';
 
@@ -248,18 +249,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
 
 
   void _showLocationSelectorModal(BuildContext context) {
-    final popularCities = [
-      {'name': 'Lagos, Nigeria', 'lat': 6.5244, 'lng': 3.3792},
-      {'name': 'Abuja, Nigeria', 'lat': 9.0765, 'lng': 7.3986},
-      {'name': 'Port Harcourt, Nigeria', 'lat': 4.8156, 'lng': 7.0498},
-      {'name': 'Ibadan, Nigeria', 'lat': 7.3775, 'lng': 3.9470},
-      {'name': 'Kano, Nigeria', 'lat': 12.0022, 'lng': 8.5919},
-      {'name': 'Accra, Ghana', 'lat': 5.6037, 'lng': -0.1870},
-      {'name': 'Nairobi, Kenya', 'lat': -1.2921, 'lng': 36.8219},
-      {'name': 'Cairo, Egypt', 'lat': 30.0444, 'lng': 31.2357},
-      {'name': 'Johannesburg, South Africa', 'lat': -26.2041, 'lng': 28.0473},
-      {'name': 'Cape Town, South Africa', 'lat': -33.9249, 'lng': 18.4241},
-    ];
+    final popularCities = PlaceholderData.popularCities;
 
     showModalBottomSheet(
       context: context,
@@ -366,7 +356,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
-              children: ['Tech', 'Music', 'Sports', 'Food', 'Art', 'Community'].map((category) {
+              children: PlaceholderData.searchFilterCategories.map((category) {
                 return FilterChip(
                   label: Text(category),
                   selected: false,

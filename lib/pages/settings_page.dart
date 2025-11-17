@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../app/app_constants.dart';
 import 'package:go_router/go_router.dart';
 import '../routes/app_routes.dart';
 
@@ -298,7 +299,7 @@ class SettingsPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'echoes',
+              AppConstants.appName,
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.grey[500],
@@ -311,7 +312,7 @@ class SettingsPage extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          'Version 1.0.0 (1000)',
+          AppConstants.appVersionFull,
           style: TextStyle(fontSize: 12, color: Colors.grey[400]),
         ),
         const SizedBox(height: 8),

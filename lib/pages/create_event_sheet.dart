@@ -3,6 +3,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import '../shared/utils/date_time_formatter.dart';
+import '../shared/data/placeholder.dart';
+import '../app/app_constants.dart';
 
 class CreateEventSheet extends StatefulWidget {
   const CreateEventSheet({super.key});
@@ -162,37 +165,11 @@ class _CreateEventSheetState extends State<CreateEventSheet> {
   }
 
   String _formatDateTime(DateTime dateTime) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-    final hour = dateTime.hour;
-    final minute = dateTime.minute;
-    final period = hour >= 12 ? 'PM' : 'AM';
-    final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
-    final timeStr = '$displayHour:${minute.toString().padLeft(2, '0')} $period';
-
-    return '${days[dateTime.weekday - 1]}, ${months[dateTime.month - 1]} ${dateTime.day} at $timeStr';
+    return DateTimeFormatter.formatFullDateTime(dateTime);
   }
 
   String _formatTime(DateTime dateTime) {
-    final hour = dateTime.hour;
-    final minute = dateTime.minute;
-    final period = hour >= 12 ? 'PM' : 'AM';
-    final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
-    return '$displayHour:${minute.toString().padLeft(2, '0')} $period';
+    return DateTimeFormatter.formatTime(dateTime);
   }
 
   Future<void> _selectExpirationDate() async {
@@ -298,11 +275,7 @@ class _CreateEventSheetState extends State<CreateEventSheet> {
   }
 
   String _formatDateOnly(DateTime dateTime) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
-    return '${months[dateTime.month - 1]} ${dateTime.day}, ${dateTime.year}';
+    return DateTimeFormatter.formatDateOnly(dateTime);
   }
 
   void _addTag(String tag) {
@@ -332,27 +305,8 @@ class _CreateEventSheetState extends State<CreateEventSheet> {
     });
   }
 
-  // Predefined popular tags
-  static const List<String> _popularTags = [
-    'Tech',
-    'Music',
-    'Art',
-    'Food',
-    'Sports',
-    'Networking',
-    'Education',
-    'Entertainment',
-    'Community',
-    'Business',
-    'Health',
-    'Fitness',
-    'Culture',
-    'Family',
-    'AI',
-    'Live',
-    'Career',
-    'Festival',
-  ];
+  // Predefined popular tags - using consolidated placeholder data
+  static const List<String> _popularTags = PlaceholderData.popularTags;
 
   void _handleCreateEvent() {
     // Validate recurring event data if enabled
@@ -1061,7 +1015,7 @@ class _CreateEventSheetState extends State<CreateEventSheet> {
   }
 
   Widget _buildRecurringDetailsSection() {
-    const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final daysOfWeek = AppConstants.dayNames;
     
     return Container(
       decoration: BoxDecoration(

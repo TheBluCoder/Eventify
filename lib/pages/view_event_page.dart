@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../shared/models/event_model.dart';
 import '../shared/widgets/event_options_menu.dart';
+import '../shared/utils/url_launcher_util.dart';
+import '../shared/utils/date_time_formatter.dart';
 
 class ViewEventPage extends StatefulWidget {
   final EventModel event;
@@ -29,82 +30,32 @@ class _ViewEventPageState extends State<ViewEventPage> {
   }
 
   String _formatDateTime(DateTime dateTime) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-    final hour = dateTime.hour;
-    final minute = dateTime.minute;
-    final period = hour >= 12 ? 'PM' : 'AM';
-    final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
-    final timeStr = '$displayHour:${minute.toString().padLeft(2, '0')} $period';
-
-    return '${days[dateTime.weekday - 1]}, ${months[dateTime.month - 1]} ${dateTime.day} at $timeStr';
+    return DateTimeFormatter.formatFullDateTime(dateTime);
   }
 
   String _formatTime(DateTime dateTime) {
-    final hour = dateTime.hour;
-    final minute = dateTime.minute;
-    final period = hour >= 12 ? 'PM' : 'AM';
-    final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
-    return '$displayHour:${minute.toString().padLeft(2, '0')} $period';
+    return DateTimeFormatter.formatTime(dateTime);
   }
 
   String _formatDateOnly(DateTime dateTime) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
-    return '${months[dateTime.month - 1]} ${dateTime.day}, ${dateTime.year}';
+    return DateTimeFormatter.formatDateOnly(dateTime);
   }
 
   String _formatRecurringDays(List<int> days) {
-    const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return days.map((day) => dayNames[day - 1]).join(', ');
+    return DateTimeFormatter.formatRecurringDays(days);
   }
 
   Future<void> _launchRegistrationUrl(String url) async {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      // Handle error if URL cannot be launched
-      debugPrint('Could not launch URL: $url');
-    }
+    await UrlLauncherUtil.launchURL(url, context: context);
   }
 
   Future<void> _launchMapLocation() async {
-    // Create a URL for maps with the event location
-    // This works for both iOS (Apple Maps) and Android (Google Maps)
-    final url = Uri.parse(
-      'https://www.google.com/maps/search/?api=1&query=${widget.event.latitude},${widget.event.longitude}',
+    await UrlLauncherUtil.launchMapLocation(
+      widget.event.latitude,
+      widget.event.longitude,
+      locationName: widget.event.location,
+      context: context,
     );
-    
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
-    } else {
-      // Fallback to alternative map URL format
-      final altUrl = Uri.parse(
-        'geo:${widget.event.latitude},${widget.event.longitude}?q=${widget.event.latitude},${widget.event.longitude}(${Uri.encodeComponent(widget.event.location)})',
-      );
-      if (await canLaunchUrl(altUrl)) {
-        await launchUrl(altUrl, mode: LaunchMode.externalApplication);
-      } else {
-        debugPrint('Could not launch map location');
-      }
-    }
   }
 
   @override

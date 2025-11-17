@@ -16,9 +16,9 @@ class DiscoverState {
   
   // Filter and discovery properties
   String _selectedCategory = 'All';
-  int _eventCount = 247; // Mock data - will be replaced with real data
+  int _eventCount = PlaceholderData.defaultEventCount; // Mock data - will be replaced with real data
   int _radiusKm = 5;
-  String _locationName = 'Lagos, Nigeria'; // Mock data - will be replaced with real location
+  String _locationName = PlaceholderData.defaultLocation; // Mock data - will be replaced with real location
   String _dateRange = 'Anytime';
   String _eventType = 'All';
   String _priceFilter = 'All';

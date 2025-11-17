@@ -1,11 +1,11 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../shared/models/event_model.dart';
 import '../app/app_constants.dart';
 import '../shared/widgets/event_card.dart';
 import '../shared/widgets/empty_state_widget.dart';
+import '../shared/utils/url_launcher_util.dart';
 
 class EventsListPage extends StatelessWidget {
   final String title;
@@ -65,6 +65,7 @@ class EventsListPage extends StatelessWidget {
                       event: event,
                       onRegistrationTap: () => _launchRegistrationUrl(
                         event.registrationUrl ?? '',
+                        context,
                       ),
                     ),
                   ),
@@ -75,11 +76,8 @@ class EventsListPage extends StatelessWidget {
   }
 
 
-  Future<void> _launchRegistrationUrl(String url) async {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
+  Future<void> _launchRegistrationUrl(String url, BuildContext context) async {
+    await UrlLauncherUtil.launchURL(url, context: context);
   }
 }
 

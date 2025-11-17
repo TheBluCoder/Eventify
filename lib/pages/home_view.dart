@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../shared/models/event_model.dart';
 import '../shared/data/placeholder.dart';
 import '../app/app_constants.dart';
@@ -10,6 +9,8 @@ import '../shared/widgets/divider_section_header.dart';
 import '../shared/widgets/distance_badge.dart';
 import '../shared/widgets/video_badge.dart';
 import '../shared/widgets/image_loading_widget.dart';
+import '../shared/utils/url_launcher_util.dart';
+import '../shared/utils/date_time_formatter.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -66,16 +67,7 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> _launchRegistrationUrl(String url) async {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open registration link')),
-        );
-      }
-    }
+    await UrlLauncherUtil.launchURL(url, context: context);
   }
 
   void _handleAddToCalendar(EventModel event) {
@@ -628,21 +620,7 @@ class _HomeState extends State<Home> {
     } else if (eventDate == today.add(const Duration(days: 1))) {
       return 'Tomorrow';
     } else {
-      const months = [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dec',
-      ];
-      return '${months[dateTime.month - 1]} ${dateTime.day}';
+      return DateTimeFormatter.formatShortDateTime(dateTime);
     }
   }
 

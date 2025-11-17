@@ -18,12 +18,12 @@ class _UserProfilePageState extends State<UserProfilePage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  // Mock user data
-  final String _userName = 'John Doe';
-  final String _userHandle = '@johndoe';
-  final String _userAvatar = PlaceholderData.currentUserAvatar;
-  final int _followersCount = 124;
-  final int _followingCount = 89;
+  // Mock user data - using consolidated placeholder data
+  final String _userName = PlaceholderData.mockCurrentUser['userName'] as String;
+  final String _userHandle = PlaceholderData.mockCurrentUser['userHandle'] as String;
+  final String _userAvatar = PlaceholderData.mockCurrentUser['userAvatar'] as String;
+  final int _followersCount = PlaceholderData.mockCurrentUser['followersCount'] as int;
+  final int _followingCount = PlaceholderData.mockCurrentUser['followingCount'] as int;
 
   // Mock event lists - in a real app, these would come from API
   List<EventModel> _createdEvents = [];
@@ -103,41 +103,8 @@ class _UserProfilePageState extends State<UserProfilePage>
       );
     }).toList();
 
-    // Mock followed pages
-    _followedPages = [
-      {
-        'id': '1',
-        'name': 'Tech Community',
-        'avatar': 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face',
-        'type': 'page',
-        'followers': 1250,
-        'isVerified': true,
-      },
-      {
-        'id': '2',
-        'name': 'Music Collective',
-        'avatar': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
-        'type': 'page',
-        'followers': 890,
-        'isVerified': false,
-      },
-      {
-        'id': '3',
-        'name': 'Design Guild',
-        'avatar': 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
-        'type': 'page',
-        'followers': 650,
-        'isVerified': true,
-      },
-      {
-        'id': '4',
-        'name': 'Startup Hub',
-        'avatar': 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face',
-        'type': 'page',
-        'followers': 2100,
-        'isVerified': true,
-      },
-    ];
+    // Mock followed pages - using consolidated placeholder data
+    _followedPages = PlaceholderData.mockFollowedPages;
   }
 
   @override
